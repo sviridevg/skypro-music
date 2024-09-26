@@ -125,4 +125,9 @@
   color: #696969;
 }
 
-.trackTime{}
+.trackTime{
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  width: 77px;
+}

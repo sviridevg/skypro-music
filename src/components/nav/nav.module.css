@@ -2,6 +2,7 @@
   width: 244px;
   background-color: #181818;
   padding: 20px 0 20px 36px;
+
 }
 
 .navLogo {
@@ -32,6 +33,7 @@
   -webkit-box-pack: justify;
   -ms-flex-pack: justify;
   justify-content: space-between;
+  cursor: pointer;
 }
 
 .burgerLine {
