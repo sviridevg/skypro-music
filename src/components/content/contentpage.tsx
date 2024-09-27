@@ -1,8 +1,13 @@
 import styles from "@/components/content/contentpage.module.css";
 import { Playlist } from "../playlist/playlist";
+import { getTracks } from "@/api/tracks";
+import { TrackTypes } from "@/types/tracks";
 
-export const ContentPage = () => {
+interface Playlist { tracks: TrackTypes[]}
+
+export const ContentPage = ({ tracks }: Playlist) => {
   const classNames = require("classnames");
+
   return (
     <div
       className={classNames(styles.centerblockContent, styles.playlistContent)}>
@@ -22,7 +27,7 @@ export const ContentPage = () => {
           </svg>
         </div>
       </div>
-      <Playlist />
+      <Playlist tracks={tracks} />
     </div>
   );
 };
