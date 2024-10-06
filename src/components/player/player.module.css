@@ -23,6 +23,19 @@
 }
 
 .barPlayerBlock {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.playerBlock {
   height: 73px;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -306,8 +319,6 @@
 .hide {
   display: none;
 }
-
-
 .btnIcon:hover svg {
   fill: transparent;
   stroke: #acacac;
@@ -320,9 +331,96 @@
   cursor: pointer;
 }
 
+.activeg {
+  fill: transparent;
+  stroke: #ffffff;
+  cursor: pointer;
+}
+
 .btnIcon:active .track-play__like-svg,
 .btnIcon:active .track-play__dislike-svg {
   fill: #696969;
   stroke: #ffffff;
   cursor: pointer;
+}
+
+.styledProgressInput {
+  --progress-height: 8px;
+  --progress-color: #b672ff;
+  --progress-bg-color: #2e2e2e;
+  --progress-appearance: #b672ff;
+
+  margin: 0;
+  width: 100%;
+  height: var(--progress-height);
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+
+  position: relative;
+  overflow: hidden;
+  transition: height 0.3s;
+
+  background: linear-gradient(
+    to right,
+    var(--progress-color) var(--value),
+    var(--progress-bg-color) var(--value)
+  );
+  background: transparent;
+}
+
+.styledProgressInput:hover {
+  --progress-height: 12px;
+}
+
+/* Стили для WebKit браузеров */
+.styledProgressInput::-webkit-slider-runnable-track {
+  height: var(--progress-height);
+  background: var(--progress-bg-color);
+}
+
+.styledProgressInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--progress-height);
+  height: var(--progress-height);
+  border-radius: 50%;
+  background: var(--progress-color);
+}
+
+/* Стили для Firefox */
+.styledProgressInput::-moz-range-track {
+  background: var(--progress-bg-color);
+  height: var(--progress-height);
+}
+
+.styledProgressInput::-moz-range-thumb {
+  border: none;
+  height: var(--progress-height);
+  width: var(--progress-height);
+  border-radius: 50%;
+  background: var(--progress-color);
+}
+
+.timerBlock {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  margin-left: 16px;
+  margin-right: 16px;
+  margin-top: 6px;
+  justify-content: space-between;
+  transition: height 0.3s;
+}
+
+.timerBlock:hover {
+  color: #ffffff;
+}
+
+.timer {
+  width: 60px;
+  height: 20px;
 }
