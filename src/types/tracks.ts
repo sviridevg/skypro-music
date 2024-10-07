@@ -7,6 +7,6 @@ export type TrackTypes = {
     duration_in_seconds: number,
     album: string,
     logo: unknown,
-    trackFile: string,
+    track_file: string,
     staredUser: number[],
 }

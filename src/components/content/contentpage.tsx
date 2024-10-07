@@ -1,11 +1,25 @@
+"use client";
+
 import styles from "@/components/content/contentpage.module.css";
 import { Playlist } from "../playlist/playlist";
-import { getTracks } from "@/api/tracks";
 import { TrackTypes } from "@/types/tracks";
+import { Dispatch, SetStateAction } from "react";
 
-interface Playlist { tracks: TrackTypes[]}
+interface Playlist {
+  tracks: TrackTypes[];
+  setCurentTrack: (track: TrackTypes) => void;
+  setIsPlaying: Dispatch<SetStateAction<boolean>>;
+  error: string | null;
+  audioRef: HTMLAudioElement | null;
+}
 
-export const ContentPage = ({ tracks }: Playlist) => {
+export const ContentPage = ({
+  tracks,
+  setCurentTrack,
+  error,
+  setIsPlaying,
+  audioRef,
+}: Playlist) => {
   const classNames = require("classnames");
 
   return (
@@ -27,7 +41,13 @@ export const ContentPage = ({ tracks }: Playlist) => {
           </svg>
         </div>
       </div>
-      <Playlist tracks={tracks} />
+      <Playlist
+        setIsPlaying={setIsPlaying}
+        setCurentTrack={setCurentTrack}
+        tracks={tracks}
+        audioRef={audioRef}
+      />
+      {error && <div>Error: {error}</div>}
     </div>
   );
 };
