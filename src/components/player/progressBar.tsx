@@ -33,10 +33,6 @@ export default function ProgressBar({
     return { minutes: minutes, seconds: seconds };
   };
 
-  const endTime = Math.floor(
-    audioRef?.duration ? audioRef.duration - progress.currentTime : 0
-  );
-
   return (
     <div>
       <div className={styles.timerBlock}>
@@ -53,7 +49,8 @@ export default function ProgressBar({
           )}
           {progress.currentTime > 0 && (
             <div>
-              {timer(endTime).minutes}:{timer(endTime).seconds}
+              {timer(Number(currentTrackDuration)).minutes}:
+              {timer(Number(currentTrackDuration)).seconds}
             </div>
           )}
         </div>
