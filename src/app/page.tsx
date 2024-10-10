@@ -10,52 +10,46 @@ import { Sidebar } from "@/components/sidebar/sidebar";
 import { getTracks } from "@/api/tracks";
 import { TrackTypes } from "@/types/tracks";
 import { SyntheticEvent, useEffect, useRef, useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/store";
+import {
+  setCurrentTrackDuration,
+  setIsPlaying,
+  setProgress,
+  setTracksList,
+} from "@/store/features/playListSlice";
 
 export default function Home() {
   const classNames = require("classnames");
-  const [tracksList, setTracksList] = useState<TrackTypes[]>([]);
-  const [curentTrack, setCurentTrack] = useState<TrackTypes | null>(null);
   const [err, setError] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState({
-    currentTime: 0,
-    duration: 0,
-  });
-
-  // запуск и остановка трека
+  const dispatch = useAppDispatch();
+  const { curentTrack } = useAppSelector((state) => state.playList);
+  const { isPlaying } = useAppSelector((state) => state.playList);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const togglePlay = () => {
     if (audioRef) {
       if (isPlaying) {
         audioRef.current?.pause();
-        setIsPlaying(false);
+        dispatch(setIsPlaying(false));
       } else {
         audioRef.current?.play();
-        setIsPlaying(true);
+        dispatch(setIsPlaying(true));
       }
     }
   };
 
-  // изменение статуса при конце песни
-  audioRef.current?.addEventListener("ended", () => {
-    setIsPlaying(false);
-  });
-
-  const [currentTrackDuration, setCurrentTrackDuration] = useState<
-    number | undefined
-  >(undefined);
-
   const onloadData = (e: SyntheticEvent<HTMLAudioElement, Event>) => {
     const duration = e.currentTarget.duration;
-    setCurrentTrackDuration(duration);
+    dispatch(setCurrentTrackDuration(duration));
   };
 
   const onChangeProgress = (e: SyntheticEvent<HTMLAudioElement, Event>) => {
-    setProgress({
-      currentTime: e.currentTarget.currentTime,
-      duration: e.currentTarget.duration,
-    });
+    dispatch(
+      setProgress({
+        currentTime: e.currentTarget.currentTime,
+        duration: e.currentTarget.duration,
+      })
+    );
   };
 
   // получение списка песен
@@ -63,7 +57,7 @@ export default function Home() {
     const fetchData = async () => {
       try {
         const tracks: TrackTypes[] = await getTracks();
-        setTracksList(tracks);
+        dispatch(setTracksList(tracks));
       } catch (error) {
         if (error instanceof Error) {
           setError(error.message);
@@ -72,7 +66,7 @@ export default function Home() {
     };
 
     fetchData();
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className={styles.wrapper}>
@@ -83,7 +77,7 @@ export default function Home() {
             className={classNames(styles.mainCenterblock, styles.centerblock)}>
             <Search />
             <h2 className={styles.centerblockH2}>Треки</h2>
-            <Filter tracks={tracksList} />
+            <Filter />
             <audio
               className={styles.audio}
               onTimeUpdate={onChangeProgress}
@@ -92,26 +86,12 @@ export default function Home() {
               src={curentTrack?.track_file}
               onLoadedData={onloadData}
             />
-            <ContentPage
-              error={err}
-              setCurentTrack={setCurentTrack}
-              tracks={tracksList}
-              setIsPlaying={setIsPlaying}
-              audioRef={audioRef.current}
-            />
+            <ContentPage error={err} audioRef={audioRef.current} />
           </div>
           <Sidebar />
         </main>
-
         {curentTrack && (
-          <Player
-            isPlaying={isPlaying}
-            audioRef={audioRef.current}
-            togglePlay={togglePlay}
-            curentTrack={curentTrack}
-            progress={progress}
-            currentTrackDuration={currentTrackDuration}
-          />
+          <Player audioRef={audioRef.current} togglePlay={togglePlay} />
         )}
         <footer className="footer" />
       </div>
