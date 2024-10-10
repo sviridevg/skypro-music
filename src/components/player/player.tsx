@@ -139,6 +139,7 @@ export const Player = ({ togglePlay, audioRef }: TrackData) => {
 
       audio.addEventListener("loadstart", function () {
         audio.play();
+        dispatch(setIsPlaying(true));
       });
 
       return () => {
