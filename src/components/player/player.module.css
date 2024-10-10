@@ -88,6 +88,7 @@
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  cursor: pointer;
 }
 
 .playerBtnPrev {
@@ -113,11 +114,6 @@
   fill: #d9d9d9;
 }
 
-.playerBtnNext {
-  margin-right: 28px;
-  fill: #a53939;
-}
-
 .playerBtnNextSvg {
   width: 15px;
   height: 14px;
@@ -126,7 +122,8 @@
 }
 
 .playerBtnRepeat {
-  margin-right: 24px;
+  margin-right: 12px;
+  margin-left: 12px;
 }
 
 .playerBtnRepeatSvg {

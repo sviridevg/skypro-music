@@ -1,34 +1,62 @@
 "use client";
 
 import styles from "@/components/player/player.module.css";
-import { TrackTypes } from "@/types/tracks";
-import { ChangeEvent, SyntheticEvent, useState } from "react";
+import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
 import ProgressBar from "./progressBar";
 import Image from "next/image";
+import { useAppDispatch, useAppSelector } from "@/store/store";
+import {
+  setCurrentTrack,
+  setIsPlaying,
+  setIsShuffle,
+  setNextTrack,
+  setPreviousTrack,
+  setShuffle,
+} from "@/store/features/playListSlice";
+import { TrackTypes } from "@/types/tracks";
 
 interface TrackData {
-  curentTrack: TrackTypes | null;
   togglePlay: () => void;
   audioRef: HTMLAudioElement | null;
-  isPlaying: boolean;
-  progress: { currentTime: number; duration: number };
-  currentTrackDuration: number | undefined;
 }
 
-export const Player = ({
-  curentTrack,
-  togglePlay,
-  audioRef,
-  isPlaying,
-  progress,
-  currentTrackDuration,
-}: TrackData) => {
+export const Player = ({ togglePlay, audioRef }: TrackData) => {
+  const { curentTrack } = useAppSelector((state) => state.playList);
+  const { progress } = useAppSelector((state) => state.playList);
+  const { isPlaying } = useAppSelector((state) => state.playList);
+  const { isShuffle } = useAppSelector((state) => state.playList);
+  const { shuffledList } = useAppSelector((state) => state.playList);
+  const { tracksList } = useAppSelector((state) => state.playList);
+  const { historyList } = useAppSelector((state) => state.playList);
+
+  const dispatch = useAppDispatch();
+
   const classNames = require("classnames");
   const [trackLoop, setTrackLoop] = useState<Boolean>(false);
+  const [playList, setPlayList] = useState<TrackTypes[]>([]);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+
+  useEffect(() => {
+    if (curentTrack) {
+      const indextrack = playList.findIndex((e) => e._id === curentTrack?._id);
+      setCurrentTrackIndex(indextrack);
+    }
+  }, [curentTrack, playList]);
+
+  useEffect(() => {
+    if (tracksList && shuffledList) {
+      setPlayList(!isShuffle ? tracksList : shuffledList);
+    }
+  }, [playList, isShuffle, shuffledList, tracksList]);
 
   let loopClass;
   if (trackLoop === true) {
     loopClass = styles.activeg;
+  }
+
+  let isShuffleClass;
+  if (isShuffle === true) {
+    isShuffleClass = styles.activeg;
   }
 
   const toggleLoop = () => {
@@ -42,8 +70,37 @@ export const Player = ({
     }
   };
 
-  const toggleSwitching = () => {
-    alert("Еще не реализовано");
+  const toggleShufle = async () => {
+    await dispatch(setIsShuffle(!isShuffle));
+    await dispatch(setShuffle());
+  };
+
+  const nextTrack = async () => {
+    const indextrack = playList.findIndex((e) => e._id === curentTrack?._id);
+    if (indextrack === playList.length - 1) return;
+
+    await dispatch(setNextTrack());
+    if (audioRef && curentTrack) {
+      audioRef.addEventListener("loadstart", function () {
+        if (audioRef.paused) {
+          audioRef.play();
+        }
+      });
+    }
+  };
+
+  const prevTrack = async () => {
+    const indextrack = playList.findIndex((e) => e._id === curentTrack?._id);
+    if (indextrack === 0) return;
+
+    await dispatch(setPreviousTrack());
+    if (audioRef && curentTrack) {
+      audioRef.addEventListener("loadstart", function () {
+        if (audioRef.paused) {
+          audioRef.play();
+        }
+      });
+    }
   };
 
   // изменение громкости
@@ -61,6 +118,35 @@ export const Player = ({
     }
   };
 
+  const handleEnded = () => {
+    // Проверяем, не является ли текущий трек последним в плейлисте
+    if (currentTrackIndex < playList.length - 1) {
+      // Переход к следующему треку
+      setCurrentTrackIndex(currentTrackIndex + 1);
+    } else {
+      // Или начинаем плейлист с начала
+      setCurrentTrackIndex(0);
+    }
+  };
+
+  // Устанавливаем источник аудио и обработчик события `ended` при изменении трека
+  useEffect(() => {
+    const audio = audioRef;
+
+    if (audio !== null && playList[currentTrackIndex] !== undefined) {
+      audio.src = playList[currentTrackIndex].track_file;
+      audio.addEventListener("ended", handleEnded);
+
+      audio.addEventListener("loadstart", function () {
+        audio.play();
+      });
+
+      return () => {
+        audio.removeEventListener("ended", handleEnded);
+      };
+    }
+  }, [currentTrackIndex, playList]);
+
   return (
     <div className={styles.bar}>
       <div className={styles.barContent}>
@@ -70,15 +156,12 @@ export const Player = ({
             value={progress.currentTime}
             step={0.01}
             onChange={handleSeek}
-            progress={progress}
-            isPlaying={isPlaying}
             audioRef={audioRef}
-            currentTrackDuration={currentTrackDuration}
           />
           <div className={styles.playerBlock}>
             <div className={styles.barPlayer}>
               <div className={styles.playerControls}>
-                <div onClick={toggleSwitching} className={styles.playerBtnPrev}>
+                <div onClick={prevTrack} className={styles.playerBtnPrev}>
                   <svg className={styles.playerBtnPrevSvg}>
                     <use xlinkHref="/icon/sprite.svg#icon-prev" />
                   </svg>
@@ -100,12 +183,11 @@ export const Player = ({
                     />
                   )}
                 </div>
-                <div onClick={toggleSwitching} className={styles.playerBtnNext}>
+                <div onClick={nextTrack} className={styles.playerBtnNext}>
                   <svg className={styles.playerBtnNextSvg}>
                     <use xlinkHref="/icon/sprite.svg#icon-next" />
                   </svg>
                 </div>
-
                 <div
                   onClick={toggleLoop}
                   className={classNames(
@@ -121,11 +203,16 @@ export const Player = ({
                   </svg>
                 </div>
                 <div
+                  onClick={toggleShufle}
                   className={classNames(
                     styles.playerBtnShuffle,
                     styles.btnIcon
                   )}>
-                  <svg className={styles.playerBtnShuffleSvg}>
+                  <svg
+                    className={classNames(
+                      styles.playerBtnShuffleSvg,
+                      isShuffleClass
+                    )}>
                     <use xlinkHref="/icon/sprite.svg#icon-shuffle" />
                   </svg>
                 </div>
