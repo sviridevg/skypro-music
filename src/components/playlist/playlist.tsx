@@ -2,32 +2,19 @@
 
 import styles from "@/components/playlist/playlist.module.css";
 import { Track } from "../track/track";
-import { TrackTypes } from "@/types/tracks";
-import { Dispatch, SetStateAction } from "react";
+import { useAppSelector } from "@/store/store";
 
 type PlaylistProps = {
-  tracks: TrackTypes[];
-  setCurentTrack: (track: TrackTypes) => void;
-  setIsPlaying: Dispatch<SetStateAction<boolean>>;
   audioRef: HTMLAudioElement | null;
 };
 
-export const Playlist = ({
-  tracks,
-  setCurentTrack,
-  setIsPlaying,
-  audioRef,
-}: PlaylistProps) => {
+export const Playlist = ({ audioRef }: PlaylistProps) => {
+  const { tracksList } = useAppSelector((state) => state.playList);
+
   return (
     <div className={styles.contentPlaylist}>
-      {tracks.map((track) => (
-        <Track
-          setIsPlaying={setIsPlaying}
-          setCurentTrack={setCurentTrack}
-          key={track._id}
-          track={track}
-          audioRef={audioRef}
-        />
+      {tracksList.map((track) => (
+        <Track key={track._id} track={track} audioRef={audioRef} />
       ))}
     </div>
   );

@@ -1,12 +1,13 @@
 "use client";
 import styles from "@/components/filter/filter.module.css";
-import { TrackTypes } from "@/types/tracks";
 import { useState } from "react";
 import { FilterItem } from "./filterItem";
+import { useAppSelector } from "@/store/store";
 
-type FilterProp = { tracks: TrackTypes[] };
+export const Filter = () => {
 
-export const Filter = ({ tracks }: FilterProp) => {
+  const { tracksList } = useAppSelector((state) => state.playList);
+  
   const classNames = require("classnames");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
@@ -26,12 +27,12 @@ export const Filter = ({ tracks }: FilterProp) => {
     {
       title: "исполнителю",
       key: "author",
-      list: getUnValue(tracks, "author"),
+      list: getUnValue(tracksList, "author"),
     },
     {
       title: "жанру",
       key: "genre",
-      list: getUnValue(tracks, "genre"),
+      list: getUnValue(tracksList, "genre"),
     },
     {
       title: "году",
