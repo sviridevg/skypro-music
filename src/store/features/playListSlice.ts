@@ -1,6 +1,7 @@
 
+import { favorites, getTracks } from "@/api/tracks";
 import { TrackTypes } from "@/types/tracks";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type playListStateType =  {
   isPlaying: boolean;
@@ -11,7 +12,10 @@ type playListStateType =  {
   shuffledList: TrackTypes[];
   historyList: TrackTypes[];
   favoritesList: TrackTypes[];
+  isFavorite: number[];
   currentTrackDuration: number | undefined;
+  status: string; 
+  error: null | string;
 }
 
 const initialState: playListStateType = {
@@ -19,13 +23,31 @@ const initialState: playListStateType = {
   shuffledList: [],
   historyList: [],
   favoritesList: [],
+  isFavorite: [],
   curentTrack: null,
   isPlaying: false,
   isShuffle: false,
   isLooping: false,
   currentTrackDuration: undefined,
+  status: "",
+  error: null,
 };
 
+
+
+export const fetchTracks = createAsyncThunk(
+  "playList/fetchTracks",
+  async () => {
+    return await getTracks()
+  }
+)
+
+export const fetchFavoritesTracks = createAsyncThunk(
+  "playList/fetchFavoritesTracks",
+  async () => {
+    return await favorites()
+  }
+)
 
 const playListSlice = createSlice({
   name: "playList",
@@ -34,6 +56,8 @@ const playListSlice = createSlice({
     setTracksList: (state, action: PayloadAction<TrackTypes[]>) => {
       state.tracksList = action.payload;
       state.shuffledList = action.payload;
+    },
+    setFavoritesList: (state, action: PayloadAction<TrackTypes[]>) => {
       state.favoritesList = action.payload;
     },
     setCurrentTrack: (state, action: PayloadAction<TrackTypes | null>) => {
@@ -85,9 +109,42 @@ const playListSlice = createSlice({
     },
     setIsLooping: (state, action: PayloadAction<boolean>) => {
       state.isLooping = action.payload;
-    }
+    },
   },
+  extraReducers: ((builder) => {
+    builder
+    .addCase(fetchTracks.pending, (state) => {
+      state.status = "pending"
+      state.error = null;
+    })
+    .addCase(fetchTracks.fulfilled, (state, action: PayloadAction<TrackTypes[]>) => {
+      state.status = "resolved";
+      state.tracksList = action.payload;
+      state.shuffledList = action.payload;
+    })
+    .addCase(fetchTracks.rejected, (state) => {
+      state.status = "rejected";
+      state.error = null;
+    })
+    .addCase(fetchFavoritesTracks.pending, (state) => {
+      state.status = "pending"
+      state.error = null;
+    })
+    .addCase(fetchFavoritesTracks.fulfilled, (state, action: PayloadAction<TrackTypes[]>) => {
+      state.status = "resolved";
+      state.favoritesList = action.payload;
+      const isFavoritearr: number[] = [];
+      action.payload.forEach(item => isFavoritearr.push(item._id));
+      state.isFavorite = isFavoritearr;
+      console.log(isFavoritearr);
+    })
+    .addCase(fetchFavoritesTracks.rejected, (state) => {
+      state.status = "rejected";
+      state.error = null;
+    })
+
+  }),
 });
 
-export const { setTracksList, setIsPlaying,   setCurrentTrack, setCurrentTrackDuration, setNextTrack, setPreviousTrack, setShuffle, setIsShuffle, setIsLooping  } = playListSlice.actions;
+export const { setTracksList,  setIsPlaying, setCurrentTrack, setCurrentTrackDuration, setNextTrack, setPreviousTrack, setShuffle, setIsShuffle, setIsLooping, setFavoritesList  } = playListSlice.actions;
 export const playListSliceReducer = playListSlice.reducer;

@@ -6,17 +6,23 @@ import { Search } from "@/components/search/search";
 import { Filter } from "@/components/filter/filter";
 import { ContentPage } from "@/components/content/contentpage";
 import { Sidebar } from "@/components/sidebar/sidebar";
-import { getTracks } from "@/api/tracks";
+import { favorites, getTracks } from "@/api/tracks";
 import { TrackTypes } from "@/types/tracks";
 import { SyntheticEvent, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { setTracksList } from "@/store/features/playListSlice";
+import { fetchFavoritesTracks, fetchTracks, setFavoritesList } from "@/store/features/playListSlice";
 import { Player } from "@/components/player/player";
 
 export default function Home() {
+  const dispatch = useAppDispatch();
+  
+  useEffect(() => {
+    dispatch(fetchTracks());
+    dispatch(fetchFavoritesTracks());
+  }, [dispatch]);
+
   const classNames = require("classnames");
   const [err, setError] = useState<string | null>(null);
-  const dispatch = useAppDispatch();
   const { curentTrack } = useAppSelector((state) => state.playList);
 
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -36,22 +42,6 @@ export default function Home() {
       duration: e.currentTarget.duration,
     });
   };
-
-  // получение списка песен
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const tracks: TrackTypes[] = await getTracks();
-        dispatch(setTracksList(tracks));
-      } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message);
-        }
-      }
-    };
-
-    fetchData();
-  }, [dispatch]);
 
   return (
     <div className={styles.wrapper}>

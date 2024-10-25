@@ -21,7 +21,6 @@ export const getTracks = async () => {
 };
 
 // Просмотреть избранное GET *
-// export const favorites = "/catalog/track/favorite/all/";
 export const favorites = async () => {
   const token = localStorage.getItem('access')
 
@@ -45,12 +44,6 @@ export const favorites = async () => {
   }
 );
 };
-
-
-
-
-
-
 
 
 

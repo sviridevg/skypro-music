@@ -33,6 +33,7 @@
   -ms-flex-align: center;
   align-items: center;
   width: 447px;
+  cursor: pointer;
 }
 
 .trackTitleImage {
@@ -139,6 +140,7 @@
   height: 12px;
   fill: transparent;
   stroke: #696969;
+  cursor: pointer;
 }
 
 .trackTimeText {
@@ -161,4 +163,10 @@
 
 .userLike{
   font-size: 16px;
+}
+
+.activeg {
+  fill: #ffffff;
+  stroke: #ffffff;
+  cursor: pointer;
 }

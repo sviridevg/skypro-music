@@ -12,18 +12,18 @@ import { TrackTypes } from "@/types/tracks";
 import { SyntheticEvent, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import {
-  setCurrentTrackDuration,
-  setIsPlaying,
+  fetchFavoritesTracks,
   setTracksList,
 } from "@/store/features/playListSlice";
 
 export default function Favorites() {
   const classNames = require("classnames");
-  const [err, setError] = useState<string | null>(null);
-  const dispatch = useAppDispatch();
+
   const { curentTrack } = useAppSelector((state) => state.playList);
-  const { isPlaying } = useAppSelector((state) => state.playList);
+  const { favoritesList } = useAppSelector((state) => state.playList);
+  const { error } = useAppSelector((state) => state.playList);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const dispatch = useAppDispatch();
 
   const [progress, setProgress] = useState<{
     currentTime: number;
@@ -33,7 +33,6 @@ export default function Favorites() {
     duration: 0,
   });
 
-
   // Определение прогресса песни
   const onChangeProgress = (e: SyntheticEvent<HTMLAudioElement, Event>) => {
     setProgress({
@@ -42,30 +41,23 @@ export default function Favorites() {
     });
   };
 
-  // получение списка песен
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const tracks: TrackTypes[] = await favorites();
-        dispatch(setTracksList(tracks));
-      } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message);
-        }
-      }
-    };
-    fetchData();
-  }, [dispatch]);
+    dispatch(setTracksList(favoritesList));
+    if (favoritesList.length === 0) {
+      dispatch(fetchFavoritesTracks());
+      dispatch(setTracksList(favoritesList));
+    }
+  }, [dispatch, favoritesList]);
 
   return (
     <div className={styles.wrapper}>
-          <audio
-            className={styles.audio}
-            onTimeUpdate={onChangeProgress}
-            ref={audioRef}
-            controls
-            src={curentTrack?.track_file}
-          />
+      <audio
+        className={styles.audio}
+        onTimeUpdate={onChangeProgress}
+        ref={audioRef}
+        controls
+        src={curentTrack?.track_file}
+      />
       <div className={styles.container}>
         <main className={styles.main}>
           <Nav />
@@ -74,7 +66,7 @@ export default function Favorites() {
             <Search />
             <h2 className={styles.centerblockH2}>Мои треки</h2>
             <Filter />
-            <ContentPage error={err} audioRef={audioRef.current} />
+            <ContentPage error={error} audioRef={audioRef.current} />
           </div>
           <Sidebar />
         </main>
