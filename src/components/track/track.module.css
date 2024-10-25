@@ -137,7 +137,6 @@
 .trackTimeSvg {
   width: 14px;
   height: 12px;
-  margin-right: 17px;
   fill: transparent;
   stroke: #696969;
 }
@@ -152,8 +151,14 @@
 }
 
 .trackTime{
-  display: flex;
-  justify-content: start;
+  display: grid;
+  grid-template-columns: 20px 20px auto;
+  justify-content: space-between;
   align-items: center;
-  width: 77px;
+  width: 103px;
+  column-gap: 6px;
+}
+
+.userLike{
+  font-size: 16px;
 }

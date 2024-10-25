@@ -8,10 +8,7 @@ interface Playlist {
   audioRef: HTMLAudioElement | null;
 }
 
-export const ContentPage = ({
-  error,
-  audioRef,
-}: Playlist) => {
+export const ContentPage = ({ error, audioRef }: Playlist) => {
   const classNames = require("classnames");
 
   return (
@@ -33,9 +30,7 @@ export const ContentPage = ({
           </svg>
         </div>
       </div>
-      <Playlist
-        audioRef={audioRef}
-      />
+      <Playlist audioRef={audioRef} />
       {error && <div>Error: {error}</div>}
     </div>
   );

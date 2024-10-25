@@ -3,22 +3,26 @@
 import styles from "./page.module.css";
 import { Nav } from "@/components/nav/nav";
 import { Search } from "@/components/search/search";
+import { Player } from "@/components/player/player";
 import { Filter } from "@/components/filter/filter";
 import { ContentPage } from "@/components/content/contentpage";
 import { Sidebar } from "@/components/sidebar/sidebar";
-import { getTracks } from "@/api/tracks";
+import { favorites, getTracks } from "@/api/tracks";
 import { TrackTypes } from "@/types/tracks";
 import { SyntheticEvent, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { setTracksList } from "@/store/features/playListSlice";
-import { Player } from "@/components/player/player";
+import {
+  setCurrentTrackDuration,
+  setIsPlaying,
+  setTracksList,
+} from "@/store/features/playListSlice";
 
-export default function Home() {
+export default function Favorites() {
   const classNames = require("classnames");
   const [err, setError] = useState<string | null>(null);
   const dispatch = useAppDispatch();
   const { curentTrack } = useAppSelector((state) => state.playList);
-
+  const { isPlaying } = useAppSelector((state) => state.playList);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const [progress, setProgress] = useState<{
@@ -28,6 +32,7 @@ export default function Home() {
     currentTime: 0,
     duration: 0,
   });
+
 
   // Определение прогресса песни
   const onChangeProgress = (e: SyntheticEvent<HTMLAudioElement, Event>) => {
@@ -41,7 +46,7 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const tracks: TrackTypes[] = await getTracks();
+        const tracks: TrackTypes[] = await favorites();
         dispatch(setTracksList(tracks));
       } catch (error) {
         if (error instanceof Error) {
@@ -49,26 +54,25 @@ export default function Home() {
         }
       }
     };
-
     fetchData();
   }, [dispatch]);
 
   return (
     <div className={styles.wrapper}>
-      <audio
-        className={styles.audio}
-        onTimeUpdate={onChangeProgress}
-        ref={audioRef}
-        controls
-        src={curentTrack?.track_file}
-      />
+          <audio
+            className={styles.audio}
+            onTimeUpdate={onChangeProgress}
+            ref={audioRef}
+            controls
+            src={curentTrack?.track_file}
+          />
       <div className={styles.container}>
         <main className={styles.main}>
           <Nav />
           <div
             className={classNames(styles.mainCenterblock, styles.centerblock)}>
             <Search />
-            <h2 className={styles.centerblockH2}>Треки</h2>
+            <h2 className={styles.centerblockH2}>Мои треки</h2>
             <Filter />
             <ContentPage error={err} audioRef={audioRef.current} />
           </div>

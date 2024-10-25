@@ -1,113 +1,84 @@
 "use client";
 
 import styles from "@/components/player/player.module.css";
-import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef } from "react";
 import ProgressBar from "./progressBar";
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import {
-  setCurrentTrack,
+  setIsLooping,
   setIsPlaying,
   setIsShuffle,
   setNextTrack,
   setPreviousTrack,
   setShuffle,
 } from "@/store/features/playListSlice";
-import { TrackTypes } from "@/types/tracks";
 
-interface TrackData {
-  togglePlay: () => void;
+type PlayerProps = {
+  progress: {
+    currentTime: number;
+    duration: number;
+  };
   audioRef: HTMLAudioElement | null;
-}
+};
 
-export const Player = ({ togglePlay, audioRef }: TrackData) => {
+export const Player = ({ progress, audioRef }: PlayerProps) => {
   const { curentTrack } = useAppSelector((state) => state.playList);
-  const { progress } = useAppSelector((state) => state.playList);
   const { isPlaying } = useAppSelector((state) => state.playList);
   const { isShuffle } = useAppSelector((state) => state.playList);
-  const { shuffledList } = useAppSelector((state) => state.playList);
-  const { tracksList } = useAppSelector((state) => state.playList);
-  const { historyList } = useAppSelector((state) => state.playList);
-
+  const { isLooping } = useAppSelector((state) => state.playList);
   const dispatch = useAppDispatch();
-
   const classNames = require("classnames");
-  const [trackLoop, setTrackLoop] = useState<Boolean>(false);
-  const [playList, setPlayList] = useState<TrackTypes[]>([]);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 
-  useEffect(() => {
-    if (curentTrack) {
-      const indextrack = playList.findIndex((e) => e._id === curentTrack?._id);
-      setCurrentTrackIndex(indextrack);
-    }
-  }, [curentTrack, playList]);
-
-  useEffect(() => {
-    if (tracksList && shuffledList) {
-      setPlayList(!isShuffle ? tracksList : shuffledList);
-    }
-  }, [playList, isShuffle, shuffledList, tracksList]);
-
-  let loopClass;
-  if (trackLoop === true) {
-    loopClass = styles.activeg;
-  }
-
-  let isShuffleClass;
-  if (isShuffle === true) {
-    isShuffleClass = styles.activeg;
-  }
-
-  const toggleLoop = () => {
+  // Включение и выключение песни
+  const togglePlay = () => {
     if (audioRef) {
-      setTrackLoop(!trackLoop);
-      if (!trackLoop) {
-        audioRef.loop = true;
+      if (isPlaying === true) {
+        audioRef?.pause();
+        dispatch(setIsPlaying(false));
       } else {
-        audioRef.loop = false;
+        audioRef?.play();
+        dispatch(setIsPlaying(true));
       }
     }
   };
 
-  const toggleShufle = async () => {
-    await dispatch(setIsShuffle(!isShuffle));
-    await dispatch(setShuffle());
-  };
-
-  const nextTrack = async () => {
-    const indextrack = playList.findIndex((e) => e._id === curentTrack?._id);
-    if (indextrack === playList.length - 1) return;
-
-    await dispatch(setNextTrack());
-    if (audioRef && curentTrack) {
-      audioRef.addEventListener("loadstart", function () {
-        if (audioRef.paused) {
-          audioRef.play();
-        }
-      });
+  // Обработчик повтора
+  const toggleLoop = () => {
+    if (audioRef) {
+      if (isLooping === false) {
+        audioRef.loop = true;
+        dispatch(setIsLooping(!isLooping));
+      } else {
+        audioRef.loop = false;
+        dispatch(setIsLooping(!isLooping));
+      }
     }
   };
 
-  const prevTrack = async () => {
-    const indextrack = playList.findIndex((e) => e._id === curentTrack?._id);
-    if (indextrack === 0) return;
+  // Обработчик рандомизации
+  const toggleShufle = () => {
+    dispatch(setIsShuffle(!isShuffle));
+    dispatch(setShuffle());
+  };
 
-    await dispatch(setPreviousTrack());
-    if (audioRef && curentTrack) {
-      audioRef.addEventListener("loadstart", function () {
-        if (audioRef.paused) {
-          audioRef.play();
-        }
-      });
-    }
+  // Переключение трека вперед
+  const nextTrack = () => {
+    dispatch(setNextTrack());
+  };
+
+  // переключение трека назад
+  const prevTrack = () => {
+    dispatch(setPreviousTrack());
   };
 
   // изменение громкости
   const onchangeVolume = (e: ChangeEvent<HTMLInputElement>) => {
     if (audioRef) {
       const volume = Number(e.target.value) / 100;
-      audioRef.volume = volume;
+      if (audioRef) {
+        audioRef.volume = volume;
+      }
     }
   };
 
@@ -118,43 +89,22 @@ export const Player = ({ togglePlay, audioRef }: TrackData) => {
     }
   };
 
-  const handleEnded = () => {
-    // Проверяем, не является ли текущий трек последним в плейлисте
-    if (currentTrackIndex < playList.length - 1) {
-      // Переход к следующему треку
-      setCurrentTrackIndex(currentTrackIndex + 1);
-    } else {
-      // Или начинаем плейлист с начала
-      setCurrentTrackIndex(0);
-    }
-  };
-
-  // Устанавливаем источник аудио и обработчик события `ended` при изменении трека
+  // Автоматическое переключение трека
+  const notAlreadyExecuted = useRef(true);
   useEffect(() => {
-    const audio = audioRef;
-
-    if (audio !== null && playList[currentTrackIndex] !== undefined) {
-      audio.src = playList[currentTrackIndex].track_file;
-      audio.addEventListener("ended", handleEnded);
-
-      audio.addEventListener("loadstart", function () {
-        audio.play();
-        dispatch(setIsPlaying(true));
-      });
-
-      return () => {
-        audio.removeEventListener("ended", handleEnded);
-      };
+    if (notAlreadyExecuted.current) {
+      audioRef?.addEventListener("ended", () => dispatch(setNextTrack()));
+      notAlreadyExecuted.current = false;
     }
-  }, [currentTrackIndex, playList]);
+  }, []);
 
   return (
     <div className={styles.bar}>
       <div className={styles.barContent}>
         <div className={styles.barPlayerBlock}>
           <ProgressBar
-            max={Number(progress.duration)}
-            value={progress.currentTime}
+            max={audioRef !== null ? audioRef.duration : 0}
+            value={progress}
             step={0.01}
             onChange={handleSeek}
             audioRef={audioRef}
@@ -196,10 +146,9 @@ export const Player = ({ togglePlay, audioRef }: TrackData) => {
                     styles.btnIcon
                   )}>
                   <svg
-                    className={classNames(
-                      styles.playerBtnRepeatSvg,
-                      loopClass
-                    )}>
+                    className={classNames(styles.playerBtnRepeatSvg, {
+                      [styles.activeg]: isLooping,
+                    })}>
                     <use xlinkHref="/icon/sprite.svg#icon-repeat" />
                   </svg>
                 </div>
@@ -210,10 +159,9 @@ export const Player = ({ togglePlay, audioRef }: TrackData) => {
                     styles.btnIcon
                   )}>
                   <svg
-                    className={classNames(
-                      styles.playerBtnShuffleSvg,
-                      isShuffleClass
-                    )}>
+                    className={classNames(styles.playerBtnShuffleSvg, {
+                      [styles.activeg]: isShuffle,
+                    })}>
                     <use xlinkHref="/icon/sprite.svg#icon-shuffle" />
                   </svg>
                 </div>
@@ -226,12 +174,12 @@ export const Player = ({ togglePlay, audioRef }: TrackData) => {
                     </svg>
                   </div>
                   <div className={styles.trackPlayAuthor}>
-                    <a className={styles.trackPlayAuthorLink} href="http://">
+                    <a className={styles.trackPlayAuthorLink} href="">
                       {curentTrack?.name}
                     </a>
                   </div>
                   <div className={styles.trackPlayAlbum}>
-                    <a className={styles.trackPlayAlbumLink} href="http://">
+                    <a className={styles.trackPlayAlbumLink} href="">
                       {curentTrack?.author}
                     </a>
                   </div>

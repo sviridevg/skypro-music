@@ -8,20 +8,21 @@ import { TrackTypes } from "@/types/tracks";
 type TrackProps = {
   track: TrackTypes;
   audioRef: HTMLAudioElement | null;
+  userLikes: number[];
 };
 
-export const Track = ({ track, audioRef }: TrackProps) => {
+export const Track = ({ track, audioRef, userLikes }: TrackProps) => {
   const classNames = require("classnames");
-
   const dispatch = useAppDispatch();
 
-  const onClickCurentTrack = async (track: TrackTypes) => {
+  // ручной запуск песен
+  const onClickCurentTrack = () => {
     if (audioRef) {
-      await dispatch(setCurrentTrack(track));
-      await dispatch(setIsPlaying(true));
+      dispatch(setCurrentTrack(track));
+      dispatch(setIsPlaying(true));
       audioRef.addEventListener("loadstart", function () {
         if (audioRef.paused) {
-          audioRef.play()
+          audioRef.play();
         }
       });
     }
@@ -36,6 +37,7 @@ export const Track = ({ track, audioRef }: TrackProps) => {
     .toString()
     .padStart(2, "0");
 
+  // Отметка мигающей точкой играющего или паузы трека
   let playingDot;
   let pausingDot;
 
@@ -51,15 +53,14 @@ export const Track = ({ track, audioRef }: TrackProps) => {
 
   return (
     <div
-      onClick={async () => {
-        await onClickCurentTrack(track);
-      }}
+      onClick={() => onClickCurentTrack()}
       key={track._id}
       className={styles.playlistItem}>
       <div className={styles.playlistTrack}>
         <div className={styles.trackTitle}>
           <div className={styles.trackTitleImage}>
             <div className={classNames(playingDot, pausingDot)}></div>
+
             {audioRef &&
               audioRef.played &&
               audioRef.src !== track.track_file && (
@@ -81,6 +82,7 @@ export const Track = ({ track, audioRef }: TrackProps) => {
           <a className={styles.trackAlbumLink}>{track.album}</a>
         </div>
         <div className={styles.trackTime}>
+          <div className={styles.userLike}>{userLikes.length}</div>
           <svg className={styles.trackTimeSvg}>
             <use xlinkHref="/icon/sprite.svg#icon-like" />
           </svg>
