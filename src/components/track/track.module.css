@@ -141,6 +141,13 @@
   fill: transparent;
   stroke: #696969;
   cursor: pointer;
+  transition: fill 0.5s ease, stroke 0.3s ease; 
+}
+
+.trackTimeSvg.activeg {
+  fill: #B672FF;
+  stroke: #B672FF;
+  cursor: pointer;
 }
 
 .trackTimeText {
@@ -163,10 +170,4 @@
 
 .userLike{
   font-size: 16px;
-}
-
-.activeg {
-  fill: #ffffff;
-  stroke: #ffffff;
-  cursor: pointer;
 }

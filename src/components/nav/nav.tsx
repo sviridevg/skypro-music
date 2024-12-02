@@ -5,7 +5,6 @@ import styles from "@/components/nav/nav.module.css";
 import { useState } from "react";
 
 import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/store/store";
 
 export const Nav = () => {
   const router = useRouter();
@@ -18,7 +17,7 @@ export const Nav = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const toggleModalUser = () => {
-    setIsOpen(true);
+    setIsOpen(!isOpen);
   };
 
   // Переход на страницу авторизации

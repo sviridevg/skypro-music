@@ -10,7 +10,6 @@ interface Playlist {
 
 export const ContentPage = ({ error, audioRef }: Playlist) => {
   const classNames = require("classnames");
-
   return (
     <div
       className={classNames(styles.centerblockContent, styles.playlistContent)}>

@@ -16,16 +16,14 @@ export default function Successfully() {
       <div className={styles.containerSignup}>
         <div className={styles.modalBlock}>
           <div className={styles.modalFormLogin}>
-            <a>
-              <div className={styles.modalLogo}>
-                <Image
-                  src="/img/logo_modal.png"
-                  alt="logo"
-                  width={140}
-                  height={21}
-                />
-              </div>
-            </a>
+            <div className={styles.modalLogo}>
+              <Image
+                src="/img/logo_modal.png"
+                alt="logo"
+                width={140}
+                height={21}
+              />
+            </div>
             <div>
               <p className={styles.successText}>
                 Вы успешно зарегистрированы. Пожалуйста, перейдите на страницу
@@ -33,7 +31,7 @@ export default function Successfully() {
               </p>
             </div>
             <button onClick={handleClick} className={styles.modalBtnSignupEnt}>
-              <a>Авторизоваться</a>
+              Авторизоваться
             </button>
           </div>
         </div>

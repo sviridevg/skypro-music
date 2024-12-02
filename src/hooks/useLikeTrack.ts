@@ -1,40 +1,43 @@
-
+import { addFavoritesForId, dellFavoritesForId } from '@/api/tracks';
+import { dellFavoriteTrack, pushFavoriteTrack, setDellFavoriteTrack, setFavoriteTrack } from '@/store/features/playListSlice';
 import { useAppDispatch, useAppSelector } from '@/store/store';
-import { TrackTypes } from '@/types/tracks';
+import { useMemo } from 'react';
 
 export const useLikeTrack = (id: number) => {
-  // const dispatch = useAppDispatch();
-
-  // const { access, refresh } = useAppSelector(state => state.auth.token);
-  // const user = useAppSelector(state => state.auth.email);
+  const dispatch = useAppDispatch();
 
   const favoriteTracks = useAppSelector(state => state.playList.isFavorite);
 
-  const isLiked: boolean = favoriteTracks.some( track => track === id);
+  // Мемоизируем вычисление isLiked
+  const isLiked = useMemo(() => favoriteTracks.some(track => track === id), [favoriteTracks, id]);
 
-  // const handleLike = async (
-  //   e: React.MouseEvent<HTMLDivElement, MouseEvent>
-  // ) => {
-  //   e.stopPropagation();
-
-    // if (!access || !refresh || !user) {
-    //   return alert('Зарегистрируйтесь или войдите');
-    // }
-
-    // const action = isLiked ? onDislikeTracks : onLikeTracks;
-
-  //   if (id)
-  //     try {
-  //       await action(id, access, refresh);
-  //       dispatch(
-  //         addFavoriteTracks({ access: access, refresh: refresh })
-  //       ).unwrap();
-  //       if (isLiked) {
-  //         dispatch(setDislikeTracks(id));
-  //       } else dispatch(setLikeTracks(id));
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  // };
-  return { isLiked };
+  const toggleLike = async () => {
+    const access = localStorage.getItem('access');
+    const refresh = localStorage.getItem('refresh');
+    const user = localStorage.getItem('email');
+  
+    if (!access || !refresh || !user) {
+      return alert('Зарегистрируйтесь или войдите');
+    }
+  
+    const action = isLiked ? dellFavoritesForId : addFavoritesForId;
+  
+    if (id) {
+      try {
+        await action(id);
+  
+        if (isLiked) {
+          dispatch(dellFavoriteTrack(id));
+          dispatch(setDellFavoriteTrack(id));
+        } else {
+          dispatch(pushFavoriteTrack(id));
+          dispatch(setFavoriteTrack(id));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+  
+  return { isLiked, toggleLike };
 };

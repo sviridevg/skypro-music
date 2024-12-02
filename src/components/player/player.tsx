@@ -13,6 +13,8 @@ import {
   setPreviousTrack,
   setShuffle,
 } from "@/store/features/playListSlice";
+import { useLikeTrack } from "@/hooks/useLikeTrack";
+import { useCallback } from "react";
 
 type PlayerProps = {
   progress: {
@@ -30,8 +32,10 @@ export const Player = ({ progress, audioRef }: PlayerProps) => {
   const dispatch = useAppDispatch();
   const classNames = require("classnames");
 
+  const { isLiked, toggleLike } = useLikeTrack(Number(curentTrack?._id));
+
   // Включение и выключение песни
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     if (audioRef) {
       if (isPlaying === true) {
         audioRef?.pause();
@@ -41,10 +45,10 @@ export const Player = ({ progress, audioRef }: PlayerProps) => {
         dispatch(setIsPlaying(true));
       }
     }
-  };
+  }, [isPlaying, audioRef, dispatch]);
 
   // Обработчик повтора
-  const toggleLoop = () => {
+  const toggleLoop = useCallback(() => {
     if (audioRef) {
       if (isLooping === false) {
         audioRef.loop = true;
@@ -54,49 +58,54 @@ export const Player = ({ progress, audioRef }: PlayerProps) => {
         dispatch(setIsLooping(!isLooping));
       }
     }
-  };
+  }, [isLooping, audioRef, dispatch]);
 
   // Обработчик рандомизации
-  const toggleShufle = () => {
+  const toggleShufle = useCallback(() => {
     dispatch(setIsShuffle(!isShuffle));
     dispatch(setShuffle());
-  };
+  }, [isShuffle, dispatch]);
 
   // Переключение трека вперед
-  const nextTrack = () => {
+  const nextTrack = useCallback(() => {
     dispatch(setNextTrack());
-  };
+  }, [dispatch]);
 
   // переключение трека назад
-  const prevTrack = () => {
+  const prevTrack = useCallback(() => {
     dispatch(setPreviousTrack());
-  };
+  }, [dispatch]);
 
   // изменение громкости
-  const onchangeVolume = (e: ChangeEvent<HTMLInputElement>) => {
-    if (audioRef) {
-      const volume = Number(e.target.value) / 100;
+  const onchangeVolume = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
       if (audioRef) {
-        audioRef.volume = volume;
+        const volume = Number(e.target.value) / 100;
+        if (audioRef) {
+          audioRef.volume = volume;
+        }
       }
-    }
-  };
+    },
+    [audioRef]
+  );
 
   // установка выбранного времени
-  const handleSeek = (e: ChangeEvent<HTMLInputElement>) => {
-    if (audioRef) {
-      audioRef.currentTime = Number(e.currentTarget.value);
-    }
-  };
+  const handleSeek = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      if (audioRef) {
+        audioRef.currentTime = Number(e.currentTarget.value);
+      }
+    },
+    [audioRef]
+  );
 
-  // Автоматическое переключение трека
   const notAlreadyExecuted = useRef(true);
   useEffect(() => {
     if (notAlreadyExecuted.current) {
       audioRef?.addEventListener("ended", () => dispatch(setNextTrack()));
       notAlreadyExecuted.current = false;
     }
-  }, []);
+  }, [audioRef, dispatch]);
 
   return (
     <div className={styles.bar}>
@@ -190,17 +199,12 @@ export const Player = ({ progress, audioRef }: PlayerProps) => {
                       styles.trackPlayLike,
                       styles.btnIcon
                     )}>
-                    <svg className={styles.trackPlayLikeSvg}>
+                    <svg
+                      onClick={toggleLike}
+                      className={classNames(styles.trackPlayLikeSvg, {
+                        [styles.actives]: isLiked,
+                      })}>
                       <use xlinkHref="/icon/sprite.svg#icon-like" />
-                    </svg>
-                  </div>
-                  <div
-                    className={classNames(
-                      styles.trackPlayDislike,
-                      styles.btnIcon
-                    )}>
-                    <svg className={styles.trackPlayDislikeSvg}>
-                      <use xlinkHref="/icon/sprite.svg#icon-dislike" />
                     </svg>
                   </div>
                 </div>

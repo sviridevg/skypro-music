@@ -1,5 +1,5 @@
 
-import { getTokens, getUser } from "@/api/auth";
+import { getTokens, getUser, updateToken } from "@/api/auth";
 import { regType, signupUser } from "@/api/reg";
 import { createAsyncThunk, createSlice, PayloadAction, SerializedError } from "@reduxjs/toolkit";
 
@@ -31,8 +31,6 @@ const initialState: AuthStateType = {
   username: '',
 };
 
-
-
 // создание асинхроннго танка 
 export const newUser = createAsyncThunk(
    "User/register",
@@ -56,6 +54,13 @@ export const newUser = createAsyncThunk(
      return await getTokens({ email, password });
    }
  )
+
+ export const updateTokenUser = createAsyncThunk(
+  'user/token/update',
+  async (refresh: string) => {
+    return await updateToken(refresh);
+  }
+);
 
 const authSlice = createSlice({
   name: "auth",
@@ -89,6 +94,14 @@ const authSlice = createSlice({
     builder.addCase(loginUser.rejected, (state, action) => {
       state.errorMessage = action.error.message;
     });
+    builder.addCase(
+      updateTokenUser.fulfilled,
+      (state, action: PayloadAction<string>) => {
+        state.authState = true;
+        state.tokens.access = action.payload;
+        localStorage.setItem('access', action.payload);
+      }
+    );
   },
 });
 

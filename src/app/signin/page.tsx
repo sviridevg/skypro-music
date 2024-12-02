@@ -5,7 +5,11 @@ import styles from "./signin.module.css";
 import classNames from "classnames";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { useState } from "react";
-import { loginUser, tokenUser } from "@/store/features/authSlice";
+import {
+  loginUser,
+  tokenUser,
+  updateTokenUser,
+} from "@/store/features/authSlice";
 import { useRouter } from "next/navigation";
 
 export default function SignIn() {
@@ -45,13 +49,15 @@ export default function SignIn() {
         await dispatch(
           tokenUser({ email: signInData.email, password: signInData.password })
         ),
+        await dispatch(updateTokenUser(localStorage.getItem("refresh") ?? "")),
       ]).then((data) => {
-        if (data[0].payload._id) {
+        if (data[0]?.payload?._id) {
           router.push("/");
+        } else {
+          setError("Не удалось войти");
         }
       });
     } catch (error) {
-      console.log(error);
       return;
     }
   };

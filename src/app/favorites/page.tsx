@@ -7,9 +7,14 @@ import { Player } from "@/components/player/player";
 import { Filter } from "@/components/filter/filter";
 import { ContentPage } from "@/components/content/contentpage";
 import { Sidebar } from "@/components/sidebar/sidebar";
-import { favorites, getTracks } from "@/api/tracks";
-import { TrackTypes } from "@/types/tracks";
-import { SyntheticEvent, useEffect, useRef, useState } from "react";
+import {
+  SyntheticEvent,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import {
   fetchFavoritesTracks,
@@ -34,12 +39,15 @@ export default function Favorites() {
   });
 
   // Определение прогресса песни
-  const onChangeProgress = (e: SyntheticEvent<HTMLAudioElement, Event>) => {
-    setProgress({
-      currentTime: e.currentTarget.currentTime,
-      duration: e.currentTarget.duration,
-    });
-  };
+  const onChangeProgress = useCallback(
+    (e: SyntheticEvent<HTMLAudioElement, Event>) => {
+      setProgress({
+        currentTime: e.currentTarget.currentTime,
+        duration: e.currentTarget.duration,
+      });
+    },
+    []
+  );
 
   useEffect(() => {
     dispatch(setTracksList(favoritesList));
@@ -49,6 +57,8 @@ export default function Favorites() {
     }
   }, [dispatch, favoritesList]);
 
+  const audioSrc = useMemo(() => curentTrack?.track_file, [curentTrack]);
+
   return (
     <div className={styles.wrapper}>
       <audio
@@ -56,7 +66,7 @@ export default function Favorites() {
         onTimeUpdate={onChangeProgress}
         ref={audioRef}
         controls
-        src={curentTrack?.track_file}
+        src={audioSrc}
       />
       <div className={styles.container}>
         <main className={styles.main}>

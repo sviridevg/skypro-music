@@ -3,23 +3,24 @@
 import styles from "@/components/track/track.module.css";
 import { useLikeTrack } from "@/hooks/useLikeTrack";
 import { setCurrentTrack, setIsPlaying } from "@/store/features/playListSlice";
-import { useAppDispatch, useAppSelector } from "@/store/store";
+import { useAppDispatch } from "@/store/store";
 import { TrackTypes } from "@/types/tracks";
 
 type TrackProps = {
   track: TrackTypes;
   audioRef: HTMLAudioElement | null;
-  userLikes: number[];
 };
 
-export const Track = ({ track, audioRef, userLikes }: TrackProps) => {
+import { useCallback } from "react";
+
+export const Track = ({ track, audioRef }: TrackProps) => {
   const classNames = require("classnames");
   const dispatch = useAppDispatch();
 
-  const { isLiked } = useLikeTrack(track._id);
+  const { isLiked, toggleLike } = useLikeTrack(track._id);
 
-  // ручной запуск песен
-  const onClickCurentTrack = () => {
+  // Оптимизация с использованием useCallback
+  const onClickCurentTrack = useCallback(() => {
     if (audioRef) {
       dispatch(setCurrentTrack(track));
       dispatch(setIsPlaying(true));
@@ -29,7 +30,7 @@ export const Track = ({ track, audioRef, userLikes }: TrackProps) => {
         }
       });
     }
-  };
+  }, [track, audioRef, dispatch]);
 
   // Форматирование времени треков
   let minutes: string = Math.floor(track.duration_in_seconds / 60)
@@ -57,10 +58,8 @@ export const Track = ({ track, audioRef, userLikes }: TrackProps) => {
   return (
     <div key={track._id} className={styles.playlistItem}>
       <div className={styles.playlistTrack}>
-        <div onClick={() => onClickCurentTrack()} className={styles.trackTitle}>
-          <div
-          
-          className={styles.trackTitleImage}>
+        <div onClick={onClickCurentTrack} className={styles.trackTitle}>
+          <div className={styles.trackTitleImage}>
             <div className={classNames(playingDot, pausingDot)}></div>
 
             {audioRef &&
@@ -71,9 +70,7 @@ export const Track = ({ track, audioRef, userLikes }: TrackProps) => {
                 </svg>
               )}
           </div>
-          <div
-            
-            className={styles.trackTitleText}>
+          <div className={styles.trackTitleText}>
             <a className={styles.trackTitleLink}>
               {track.name} <span className={styles.trackTitleSpan} />
             </a>
@@ -86,8 +83,8 @@ export const Track = ({ track, audioRef, userLikes }: TrackProps) => {
           <a className={styles.trackAlbumLink}>{track.album}</a>
         </div>
         <div className={styles.trackTime}>
-          <div className={styles.userLike}>{userLikes.length}</div>
           <svg
+            onClick={toggleLike}
             className={classNames(styles.trackTimeSvg, {
               [styles.activeg]: isLiked,
             })}>

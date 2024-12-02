@@ -6,16 +6,30 @@ import { Search } from "@/components/search/search";
 import { Filter } from "@/components/filter/filter";
 import { ContentPage } from "@/components/content/contentpage";
 import { Sidebar } from "@/components/sidebar/sidebar";
-import { favorites, getTracks } from "@/api/tracks";
-import { TrackTypes } from "@/types/tracks";
 import { SyntheticEvent, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { fetchFavoritesTracks, fetchTracks, setFavoritesList } from "@/store/features/playListSlice";
+import {
+  fetchFavoritesTracks,
+  fetchTracks,
+} from "@/store/features/playListSlice";
 import { Player } from "@/components/player/player";
+import { updateTokenUser } from "@/store/features/authSlice";
 
 export default function Home() {
   const dispatch = useAppDispatch();
-  
+
+  const tokenUpdate = async () => {
+    const reftoken = localStorage.getItem("refresh") ?? "";
+    await dispatch(updateTokenUser(reftoken));
+  };
+
+  useEffect(() => {
+    const accToken = localStorage.getItem("access");
+    if (!accToken) {
+      tokenUpdate();
+    }
+  }, []);
+
   useEffect(() => {
     dispatch(fetchTracks());
     dispatch(fetchFavoritesTracks());
