@@ -6,7 +6,7 @@ import { useAppSelector } from "@/store/store";
 
 type progressBarProps = {
   max: number;
-  value: number;
+  value: { currentTime: number; duration: number };
   step: number;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   audioRef: HTMLAudioElement | null;
@@ -17,9 +17,9 @@ export default function ProgressBar({
   value,
   step,
   onChange,
+  audioRef,
 }: progressBarProps) {
-  const { currentTrackDuration } = useAppSelector((state) => state.playList);
-  const { progress } = useAppSelector((state) => state.playList);
+  const currentTrackDuration = audioRef?.duration;
 
   const timer = (time: number) => {
     let minutes = Math.floor(time / 60)
@@ -35,17 +35,16 @@ export default function ProgressBar({
     <div>
       <div className={styles.timerBlock}>
         <div>
-          {timer(progress.currentTime).minutes}:
-          {timer(progress.currentTime).seconds}
+          {timer(value.currentTime).minutes}:{timer(value.currentTime).seconds}
         </div>
         <div>
-          {!progress.duration && currentTrackDuration && (
+          {!value.duration && currentTrackDuration && (
             <div>
               {timer(currentTrackDuration).minutes}:
               {timer(currentTrackDuration).seconds}
             </div>
           )}
-          {progress.currentTime > 0 && (
+          {value.currentTime > 0 && (
             <div>
               {timer(Number(currentTrackDuration)).minutes}:
               {timer(Number(currentTrackDuration)).seconds}
@@ -60,7 +59,7 @@ export default function ProgressBar({
         type="range"
         min="0"
         max={String(max)}
-        value={value}
+        value={value.currentTime}
         step={step}
         onChange={onChange}
       />

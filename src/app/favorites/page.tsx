@@ -3,43 +3,32 @@
 import styles from "./page.module.css";
 import { Nav } from "@/components/nav/nav";
 import { Search } from "@/components/search/search";
+import { Player } from "@/components/player/player";
 import { Filter } from "@/components/filter/filter";
 import { ContentPage } from "@/components/content/contentpage";
 import { Sidebar } from "@/components/sidebar/sidebar";
-import { SyntheticEvent, useEffect, useRef, useState } from "react";
+import {
+  SyntheticEvent,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import {
   fetchFavoritesTracks,
-  fetchTracks,
+  setTracksList,
 } from "@/store/features/playListSlice";
-import { Player } from "@/components/player/player";
-import { updateTokenUser } from "@/store/features/authSlice";
 
-export default function Home() {
-  const dispatch = useAppDispatch();
-
-  const tokenUpdate = async () => {
-    const reftoken = localStorage.getItem("refresh") ?? "";
-    await dispatch(updateTokenUser(reftoken));
-  };
-
-  useEffect(() => {
-    const accToken = localStorage.getItem("access");
-    if (!accToken) {
-      tokenUpdate();
-    }
-  }, []);
-
-  useEffect(() => {
-    dispatch(fetchTracks());
-    dispatch(fetchFavoritesTracks());
-  }, [dispatch]);
-
+export default function Favorites() {
   const classNames = require("classnames");
-  const [err, setError] = useState<string | null>(null);
-  const { curentTrack } = useAppSelector((state) => state.playList);
 
+  const { curentTrack } = useAppSelector((state) => state.playList);
+  const { favoritesList } = useAppSelector((state) => state.playList);
+  const { error } = useAppSelector((state) => state.playList);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const dispatch = useAppDispatch();
 
   const [progress, setProgress] = useState<{
     currentTime: number;
@@ -50,12 +39,25 @@ export default function Home() {
   });
 
   // Определение прогресса песни
-  const onChangeProgress = (e: SyntheticEvent<HTMLAudioElement, Event>) => {
-    setProgress({
-      currentTime: e.currentTarget.currentTime,
-      duration: e.currentTarget.duration,
-    });
-  };
+  const onChangeProgress = useCallback(
+    (e: SyntheticEvent<HTMLAudioElement, Event>) => {
+      setProgress({
+        currentTime: e.currentTarget.currentTime,
+        duration: e.currentTarget.duration,
+      });
+    },
+    []
+  );
+
+  useEffect(() => {
+    dispatch(setTracksList(favoritesList));
+    if (favoritesList.length === 0) {
+      dispatch(fetchFavoritesTracks());
+      dispatch(setTracksList(favoritesList));
+    }
+  }, [dispatch, favoritesList]);
+
+  const audioSrc = useMemo(() => curentTrack?.track_file, [curentTrack]);
 
   return (
     <div className={styles.wrapper}>
@@ -64,7 +66,7 @@ export default function Home() {
         onTimeUpdate={onChangeProgress}
         ref={audioRef}
         controls
-        src={curentTrack?.track_file}
+        src={audioSrc}
       />
       <div className={styles.container}>
         <main className={styles.main}>
@@ -72,9 +74,9 @@ export default function Home() {
           <div
             className={classNames(styles.mainCenterblock, styles.centerblock)}>
             <Search />
-            <h2 className={styles.centerblockH2}>Треки</h2>
+            <h2 className={styles.centerblockH2}>Мои треки</h2>
             <Filter />
-            <ContentPage error={err} audioRef={audioRef.current} />
+            <ContentPage error={error} audioRef={audioRef.current} />
           </div>
           <Sidebar />
         </main>
