@@ -84,6 +84,7 @@ export const Track = ({ track, audioRef }: TrackProps) => {
         </div>
         <div className={styles.trackTime}>
           <svg
+            data-testid="like-button"
             onClick={toggleLike}
             className={classNames(styles.trackTimeSvg, {
               [styles.activeg]: isLiked,

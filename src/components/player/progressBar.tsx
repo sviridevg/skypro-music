@@ -2,7 +2,6 @@
 
 import { ChangeEvent } from "react";
 import styles from "./player.module.css";
-import { useAppSelector } from "@/store/store";
 
 type progressBarProps = {
   max: number;
