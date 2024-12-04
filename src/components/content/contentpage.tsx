@@ -2,6 +2,7 @@
 
 import styles from "@/components/content/contentpage.module.css";
 import { Playlist } from "../playlist/playlist";
+import { useAppSelector } from "@/store/store";
 
 interface Playlist {
   error: string | null;
@@ -9,6 +10,7 @@ interface Playlist {
 }
 
 export const ContentPage = ({ error, audioRef }: Playlist) => {
+  const { status } = useAppSelector((state) => state.playList);
   const classNames = require("classnames");
   return (
     <div
@@ -29,7 +31,12 @@ export const ContentPage = ({ error, audioRef }: Playlist) => {
           </svg>
         </div>
       </div>
-      <Playlist audioRef={audioRef} />
+      {status === "pending" ? (
+        <div>Загрузка...</div>
+      ) : (
+        <Playlist audioRef={audioRef} />
+      )}
+
       {error && <div>Error: {error}</div>}
     </div>
   );

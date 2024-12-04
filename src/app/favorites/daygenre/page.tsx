@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "./page.module.css";
+import styles from "@/app/favorites/page.module.css";
 import { Nav } from "@/components/nav/nav";
 import { Search } from "@/components/search/search";
 import { Player } from "@/components/player/player";
@@ -18,19 +18,20 @@ import {
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import {
   fetchFavoritesTracks,
+  fetchGenre,
+  fetchTracks,
   setTracksList,
 } from "@/store/features/playListSlice";
 
-export default function Favorites() {
+export default function DayGenre() {
   const classNames = require("classnames");
 
   const { curentTrack } = useAppSelector((state) => state.playList);
-  const { favoritesList } = useAppSelector((state) => state.playList);
+  const { genreList } = useAppSelector((state) => state.playList);
+  const { tracksList } = useAppSelector((state) => state.playList);
   const { error } = useAppSelector((state) => state.playList);
   const audioRef = useRef<HTMLAudioElement>(null);
   const dispatch = useAppDispatch();
-
-  console.log(favoritesList);
 
   const [progress, setProgress] = useState<{
     currentTime: number;
@@ -52,12 +53,8 @@ export default function Favorites() {
   );
 
   useEffect(() => {
-    dispatch(setTracksList(favoritesList));
-    if (favoritesList.length === 0) {
-      dispatch(fetchFavoritesTracks());
-      dispatch(setTracksList(favoritesList));
-    }
-  }, [dispatch, favoritesList]);
+    dispatch(fetchTracks()).then(() => dispatch(fetchGenre(2)));
+  }, [dispatch]);
 
   const audioSrc = useMemo(() => curentTrack?.track_file, [curentTrack]);
 
@@ -76,7 +73,7 @@ export default function Favorites() {
           <div
             className={classNames(styles.mainCenterblock, styles.centerblock)}>
             <Search />
-            <h2 className={styles.centerblockH2}>Мои треки</h2>
+            <h2 className={styles.centerblockH2}>Плейлист дня </h2>
             <Filter />
             <ContentPage error={error} audioRef={audioRef.current} />
           </div>

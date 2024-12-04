@@ -3,6 +3,8 @@ import {
   dellFavoritesForId,
   favorites,
   getTracks,
+  viewSelection,
+  viewSelectionForId,
 } from "@/api/tracks";
 import { TrackTypes } from "@/types/tracks";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
@@ -17,6 +19,7 @@ type playListStateType = {
   shuffledList: TrackTypes[];
   historyList: TrackTypes[];
   favoritesList: TrackTypes[];
+  genreList: TrackTypes[];
   isFavorite: number[];
   currentTrackDuration: number | undefined;
   status: string;
@@ -28,6 +31,7 @@ const initialState: playListStateType = {
   shuffledList: [],
   historyList: [],
   favoritesList: [],
+  genreList: [],
   isFavorite: [],
   curentTrack: null,
   isPlaying: false,
@@ -52,6 +56,14 @@ export const fetchFavoritesTracks = createAsyncThunk(
     return await favorites();
   }
 );
+
+export const fetchGenre = createAsyncThunk(
+  "playList/fetchGenre",
+  async (id: number) => {
+    return await viewSelectionForId(id);
+  }
+);
+
 
 export const pushFavoriteTrack = createAsyncThunk(
   "playList/pushFavoriteTrack",
@@ -186,6 +198,28 @@ const playListSlice = createSlice({
       .addCase(fetchFavoritesTracks.rejected, (state) => {
         state.status = "rejected";
         state.error = null;
+      })
+      .addCase(fetchGenre.pending, (state) => {
+        state.status = "pending";
+        state.error = null;
+      })
+      .addCase(
+        fetchGenre.fulfilled,
+        (state, action: PayloadAction<{ items: TrackTypes[] }>) => {
+          state.status = "resolved";
+
+          // Сохраняем items напрямую в genreList
+          state.genreList = action.payload.items;
+
+          // Фильтруем tracksList, чтобы оставить только те треки, которые есть в genreList
+          state.tracksList = state.tracksList.filter((track) =>
+            state.genreList.includes(track._id)
+          );
+        }
+      )
+      .addCase(fetchGenre.rejected, (state, action) => {
+        state.status = "rejected";
+        state.error = action.error.message || "Ошибка загрузки жанров";
       });
   },
 });
