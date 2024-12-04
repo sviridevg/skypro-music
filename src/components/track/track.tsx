@@ -38,27 +38,17 @@ export const Track = ({ track }: TrackProps) => {
     return { minutes, seconds };
   }, [track.duration_in_seconds]);
 
-  // Отметка мигающей точкой играющего или паузы трека
-  let playingDot;
-  let pausingDot;
-
-  if (isPlaying && currentTrack === track) {
-    playingDot = styles.playingDot;
-    pausingDot = !pausingDot;
-  }
-
-  if (!isPlaying && currentTrack === track) {
-    pausingDot = styles.pausingDot;
-    playingDot = !playingDot;
-  }
-
   useEffect(() => {
-    if (currentTrack?._id === track._id && isPlaying) {
-      // При монтировании компонента проверяем, если это тот же трек и он играет
-      // Трек должен продолжать воспроизведение
+    if (currentTrack?._id === track._id) {
       dispatch(setCurrentTrack(currentTrack));
+      dispatch(setIsPlaying(isPlaying));
     }
-  }, [track, currentTrack, dispatch, isPlaying]);
+  }, [currentTrack, track._id, dispatch, isPlaying]);
+
+  const playingDot =
+    isPlaying && currentTrack?._id === track._id ? styles.playingDot : "";
+  const pausingDot =
+    !isPlaying && currentTrack?._id === track._id ? styles.pausingDot : "";
 
   return (
     <div key={track._id} className={styles.playlistItem}>
@@ -66,14 +56,13 @@ export const Track = ({ track }: TrackProps) => {
         <div onClick={onClickCurentTrack} className={styles.trackTitle}>
           <div className={styles.trackTitleImage}>
             <div className={classNames(playingDot, pausingDot)}></div>
-            {isPlaying && currentTrack === track && ""}
-            {!isPlaying && currentTrack === track && ""}
-            {!isPlaying && currentTrack !== track && (
-              <svg className={styles.trackTitleSvg}>
-                <use xlinkHref="/icon/sprite.svg#icon-note" />
-              </svg>
-            )}
-            {isPlaying && currentTrack !== track && (
+            {currentTrack?._id === track._id ? (
+              isPlaying ? (
+                ""
+              ) : (
+                ""
+              )
+            ) : (
               <svg className={styles.trackTitleSvg}>
                 <use xlinkHref="/icon/sprite.svg#icon-note" />
               </svg>
