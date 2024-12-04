@@ -47,3 +47,7 @@
 .audio {
   display: none;
 }
+
+.hidden {
+  display: none;
+}

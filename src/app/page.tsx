@@ -6,7 +6,7 @@ import { Search } from "@/components/search/search";
 import { Filter } from "@/components/filter/filter";
 import { ContentPage } from "@/components/content/contentpage";
 import { Sidebar } from "@/components/sidebar/sidebar";
-import { SyntheticEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import {
   fetchFavoritesTracks,
@@ -14,6 +14,7 @@ import {
 } from "@/store/features/playListSlice";
 import { Player } from "@/components/player/player";
 import { updateTokenUser } from "@/store/features/authSlice";
+import classNames from "classnames";
 
 export default function Home() {
   const dispatch = useAppDispatch();
@@ -35,37 +36,11 @@ export default function Home() {
     dispatch(fetchFavoritesTracks());
   }, [dispatch]);
 
-  const classNames = require("classnames");
   const [err, setError] = useState<string | null>(null);
-  const { curentTrack } = useAppSelector((state) => state.playList);
-
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  const [progress, setProgress] = useState<{
-    currentTime: number;
-    duration: number;
-  }>({
-    currentTime: 0,
-    duration: 0,
-  });
-
-  // Определение прогресса песни
-  const onChangeProgress = (e: SyntheticEvent<HTMLAudioElement, Event>) => {
-    setProgress({
-      currentTime: e.currentTarget.currentTime,
-      duration: e.currentTarget.duration,
-    });
-  };
+  const { currentTrack } = useAppSelector((state) => state.playList);
 
   return (
     <div className={styles.wrapper}>
-      <audio
-        className={styles.audio}
-        onTimeUpdate={onChangeProgress}
-        ref={audioRef}
-        controls
-        src={curentTrack?.track_file}
-      />
       <div className={styles.container}>
         <main className={styles.main}>
           <Nav />
@@ -74,13 +49,17 @@ export default function Home() {
             <Search />
             <h2 className={styles.centerblockH2}>Треки</h2>
             <Filter />
-            <ContentPage error={err} audioRef={audioRef.current} />
+            <ContentPage error={err} />
           </div>
           <Sidebar />
         </main>
-        {curentTrack && (
-          <Player progress={progress} audioRef={audioRef.current} />
-        )}
+        <div
+          className={classNames(styles.playerWrapper, {
+            [styles.hidden]: !currentTrack, 
+          })}>
+          <Player />
+        </div>
+
         <footer className="footer" />
       </div>
     </div>

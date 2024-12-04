@@ -2,13 +2,14 @@
 
 import { ChangeEvent } from "react";
 import styles from "./player.module.css";
+import { useAppSelector } from "@/store/store";
 
 type progressBarProps = {
   max: number;
   value: { currentTime: number; duration: number };
   step: number;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  audioRef: HTMLAudioElement | null;
+  // audioRef: HTMLAudioElement | null;
 };
 
 export default function ProgressBar({
@@ -16,8 +17,9 @@ export default function ProgressBar({
   value,
   step,
   onChange,
-  audioRef,
+  // audioRef,
 }: progressBarProps) {
+  const { audioRef } = useAppSelector((state) => state.playList);
   const currentTrackDuration = audioRef?.duration;
 
   const timer = (time: number) => {

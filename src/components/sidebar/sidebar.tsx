@@ -10,6 +10,7 @@ export const Sidebar = () => {
   const dispatch = useAppDispatch();
   const { authState } = useAppSelector((state) => state.auth);
   const [username, setUsername] = useState<String>("");
+
   useEffect(() => {
     setUsername(localStorage.getItem("username") ?? "");
   }, []);

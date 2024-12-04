@@ -1,11 +1,4 @@
-import {
-  addFavoritesForId,
-  dellFavoritesForId,
-  favorites,
-  getTracks,
-  viewSelection,
-  viewSelectionForId,
-} from "@/api/tracks";
+import { addFavoritesForId, dellFavoritesForId, favorites, getTracks, viewSelectionForId } from "@/api/tracks";
 import { TrackTypes } from "@/types/tracks";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -14,7 +7,7 @@ type playListStateType = {
   isShuffle: boolean;
   isLooping: boolean;
   isLiked: boolean;
-  curentTrack: TrackTypes | null;
+  currentTrack: TrackTypes | null;
   tracksList: TrackTypes[];
   shuffledList: TrackTypes[];
   historyList: TrackTypes[];
@@ -33,7 +26,7 @@ const initialState: playListStateType = {
   favoritesList: [],
   genreList: [],
   isFavorite: [],
-  curentTrack: null,
+  currentTrack: null,
   isPlaying: false,
   isShuffle: false,
   isLooping: false,
@@ -43,41 +36,25 @@ const initialState: playListStateType = {
   error: null,
 };
 
-export const fetchTracks = createAsyncThunk(
-  "playList/fetchTracks",
-  async () => {
-    return await getTracks();
-  }
-);
+export const fetchTracks = createAsyncThunk("playList/fetchTracks", async () => {
+  return await getTracks();
+});
 
-export const fetchFavoritesTracks = createAsyncThunk(
-  "playList/fetchFavoritesTracks",
-  async () => {
-    return await favorites();
-  }
-);
+export const fetchFavoritesTracks = createAsyncThunk("playList/fetchFavoritesTracks", async () => {
+  return await favorites();
+});
 
-export const fetchGenre = createAsyncThunk(
-  "playList/fetchGenre",
-  async (id: number) => {
-    return await viewSelectionForId(id);
-  }
-);
+export const fetchGenre = createAsyncThunk("playList/fetchGenre", async (id: number) => {
+  return await viewSelectionForId(id);
+});
 
+export const pushFavoriteTrack = createAsyncThunk("playList/pushFavoriteTrack", async (id: number) => {
+  return await addFavoritesForId(id);
+});
 
-export const pushFavoriteTrack = createAsyncThunk(
-  "playList/pushFavoriteTrack",
-  async (id: number) => {
-    return await addFavoritesForId(id);
-  }
-);
-
-export const dellFavoriteTrack = createAsyncThunk(
-  "playList/dellFavoriteTrack",
-  async (id: number) => {
-    return await dellFavoritesForId(id);
-  }
-);
+export const dellFavoriteTrack = createAsyncThunk("playList/dellFavoriteTrack", async (id: number) => {
+  return await dellFavoritesForId(id);
+});
 
 const playListSlice = createSlice({
   name: "playList",
@@ -90,51 +67,32 @@ const playListSlice = createSlice({
     setFavoritesList: (state, action: PayloadAction<TrackTypes[]>) => {
       state.favoritesList = action.payload;
     },
-    setCurrentTrack: (state, action: PayloadAction<TrackTypes | null>) => {
-      state.curentTrack = action.payload;
-      state.historyList =
-        state.curentTrack !== null
-          ? [...state.historyList, state.curentTrack]
-          : state.historyList;
+    setCurrentTrack: (state, action: PayloadAction<TrackTypes>) => {
+      state.currentTrack = action.payload;
     },
     setIsPlaying: (state, action: PayloadAction<boolean>) => {
       state.isPlaying = action.payload;
     },
-    setCurrentTrackDuration: (
-      state,
-      action: PayloadAction<number | undefined>
-    ) => {
+    setCurrentTrackDuration: (state, action: PayloadAction<number | undefined>) => {
       state.currentTrackDuration = action.payload;
     },
     setNextTrack: (state) => {
       const playList = !state.isShuffle ? state.tracksList : state.shuffledList;
-      const indexTrack = playList.findIndex(
-        (e) => e._id === state.curentTrack?._id
-      );
+      const indexTrack = playList.findIndex((e) => e._id === state.currentTrack?._id);
 
-      // Запуск следующей песни по клику
-      state.curentTrack = playList[indexTrack + 1];
+      state.currentTrack = playList[indexTrack + 1] || playList[0];
 
-      // Обработчик последней песни
-      if (indexTrack === playList.length - 1) {
-        state.curentTrack = playList[0];
-        return;
-      }
-
-      // Обработчик состояния переключения песни из режима паузы
       if (state.isPlaying === false) {
         state.isPlaying = true;
       }
     },
     setPreviousTrack: (state) => {
       const playList = !state.isShuffle ? state.tracksList : state.shuffledList;
-      const indexTrack = playList.findIndex(
-        (e) => e._id === state.curentTrack?._id
-      );
+      const indexTrack = playList.findIndex((e) => e._id === state.currentTrack?._id);
       if (indexTrack === 0) {
         return;
       }
-      state.curentTrack = playList[indexTrack - 1];
+      state.currentTrack = playList[indexTrack - 1];
       if (state.isPlaying === false) {
         state.isPlaying = true;
       }
@@ -155,11 +113,8 @@ const playListSlice = createSlice({
         state.favoritesList.push(track);
       }
     },
-
     setDellFavoriteTrack: (state, action) => {
-      state.favoritesList = state.favoritesList.filter(
-        (track) => track._id !== action.payload
-      );
+      state.favoritesList = state.favoritesList.filter((track) => track._id !== action.payload);
       state.isFavorite = state.isFavorite.filter((id) => id !== action.payload);
     },
   },
@@ -169,14 +124,11 @@ const playListSlice = createSlice({
         state.status = "pending";
         state.error = null;
       })
-      .addCase(
-        fetchTracks.fulfilled,
-        (state, action: PayloadAction<TrackTypes[]>) => {
-          state.status = "resolved";
-          state.tracksList = action.payload;
-          state.shuffledList = action.payload;
-        }
-      )
+      .addCase(fetchTracks.fulfilled, (state, action: PayloadAction<TrackTypes[]>) => {
+        state.status = "resolved";
+        state.tracksList = action.payload;
+        state.shuffledList = action.payload;
+      })
       .addCase(fetchTracks.rejected, (state) => {
         state.status = "rejected";
         state.error = null;
@@ -185,16 +137,13 @@ const playListSlice = createSlice({
         state.status = "pending";
         state.error = null;
       })
-      .addCase(
-        fetchFavoritesTracks.fulfilled,
-        (state, action: PayloadAction<TrackTypes[]>) => {
-          state.status = "resolved";
-          state.favoritesList = action.payload;
-          const isFavoritearr: number[] = [];
-          action.payload.forEach((item) => isFavoritearr.push(item._id));
-          state.isFavorite = isFavoritearr;
-        }
-      )
+      .addCase(fetchFavoritesTracks.fulfilled, (state, action: PayloadAction<TrackTypes[]>) => {
+        state.status = "resolved";
+        state.favoritesList = action.payload;
+        const isFavoritearr: number[] = [];
+        action.payload.forEach((item) => isFavoritearr.push(item._id));
+        state.isFavorite = isFavoritearr;
+      })
       .addCase(fetchFavoritesTracks.rejected, (state) => {
         state.status = "rejected";
         state.error = null;
@@ -203,20 +152,13 @@ const playListSlice = createSlice({
         state.status = "pending";
         state.error = null;
       })
-      .addCase(
-        fetchGenre.fulfilled,
-        (state, action: PayloadAction<{ items: TrackTypes[] }>) => {
-          state.status = "resolved";
-
-          // Сохраняем items напрямую в genreList
-          state.genreList = action.payload.items;
-
-          // Фильтруем tracksList, чтобы оставить только те треки, которые есть в genreList
-          state.tracksList = state.tracksList.filter((track) =>
-            state.genreList.includes(track._id)
-          );
-        }
-      )
+      .addCase(fetchGenre.fulfilled, (state, action: PayloadAction<{ items: TrackTypes[] }>) => {
+        state.status = "resolved";
+        state.genreList = action.payload.items;
+        state.tracksList = state.shuffledList.filter((track) =>
+          state.genreList.includes(track._id)
+        );
+      })
       .addCase(fetchGenre.rejected, (state, action) => {
         state.status = "rejected";
         state.error = action.error.message || "Ошибка загрузки жанров";
@@ -238,4 +180,5 @@ export const {
   setFavoriteTrack,
   setDellFavoriteTrack,
 } = playListSlice.actions;
+
 export const playListSliceReducer = playListSlice.reducer;

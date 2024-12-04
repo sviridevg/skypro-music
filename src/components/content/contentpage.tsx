@@ -6,12 +6,12 @@ import { useAppSelector } from "@/store/store";
 
 interface Playlist {
   error: string | null;
-  audioRef: HTMLAudioElement | null;
 }
 
-export const ContentPage = ({ error, audioRef }: Playlist) => {
+export const ContentPage = ({ error }: Playlist) => {
   const { status } = useAppSelector((state) => state.playList);
   const classNames = require("classnames");
+
   return (
     <div
       className={classNames(styles.centerblockContent, styles.playlistContent)}>
@@ -34,7 +34,7 @@ export const ContentPage = ({ error, audioRef }: Playlist) => {
       {status === "pending" ? (
         <div>Загрузка...</div>
       ) : (
-        <Playlist audioRef={audioRef} />
+        <Playlist/>
       )}
 
       {error && <div>Error: {error}</div>}
