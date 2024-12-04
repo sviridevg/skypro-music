@@ -59,7 +59,6 @@ export default function Home() {
           })}>
           <Player />
         </div>
-
         <footer className="footer" />
       </div>
     </div>

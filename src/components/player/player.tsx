@@ -31,7 +31,7 @@ export const Player = () => {
   const { isLiked, toggleLike } = useLikeTrack(Number(currentTrack?._id));
 
   // Инициализация audioRef
-const audioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const [progress, setProgress] = useState<PlayerProps>({
     currentTime: 0,
@@ -113,7 +113,7 @@ const audioRef = useRef<HTMLAudioElement>(null);
   const handleCanPlay = () => {
     audioRef.current?.play();
     dispatch(setIsPlaying(true));
-}
+  };
 
   return (
     <div className={styles.bar}>
@@ -132,6 +132,7 @@ const audioRef = useRef<HTMLAudioElement>(null);
             value={progress}
             step={0.01}
             onChange={handleSeek}
+            audioRef={audioRef.current}
           />
           <div className={styles.playerBlock}>
             <div className={styles.barPlayer}>
@@ -143,7 +144,7 @@ const audioRef = useRef<HTMLAudioElement>(null);
                 </div>
                 <div
                   onClick={togglePlay}
-                  className={classNames(styles.playerBtnPlay, styles.btn)} >
+                  className={classNames(styles.playerBtnPlay, styles.btn)}>
                   {!isPlaying ? (
                     <svg className={styles.playerBtnPlaySvg}>
                       {" "}
@@ -198,10 +199,14 @@ const audioRef = useRef<HTMLAudioElement>(null);
                     </svg>
                   </div>
                   <div className={styles.trackPlayAuthor}>
-                    <a className={styles.trackPlayAuthorLink} href="">{currentTrack?.name}</a>
+                    <a className={styles.trackPlayAuthorLink} href="">
+                      {currentTrack?.name}
+                    </a>
                   </div>
                   <div className={styles.trackPlayAlbum}>
-                    <a className={styles.trackPlayAlbumLink} href="">{currentTrack?.author}</a>
+                    <a className={styles.trackPlayAlbumLink} href="">
+                      {currentTrack?.author}
+                    </a>
                   </div>
                 </div>
                 <div className={styles.trackPlayLikeDis}>
