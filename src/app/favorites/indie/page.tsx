@@ -7,11 +7,9 @@ import { Player } from "@/components/player/player";
 import { Filter } from "@/components/filter/filter";
 import { ContentPage } from "@/components/content/contentpage";
 import { Sidebar } from "@/components/sidebar/sidebar";
-import {
-  useEffect,
-} from "react";
+import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { fetchGenre } from "@/store/features/playListSlice";
+import { fetchGenre, fetchTracks } from "@/store/features/playListSlice";
 
 export default function Indie() {
   const classNames = require("classnames");
@@ -21,7 +19,9 @@ export default function Indie() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(fetchGenre(4));
+    dispatch(fetchTracks()).then(() => {
+      dispatch(fetchGenre(4));
+    });
   }, [dispatch]);
 
   return (
@@ -40,7 +40,7 @@ export default function Indie() {
         </main>
         <div
           className={classNames(styles.playerWrapper, {
-            [styles.hidden]: !currentTrack, 
+            [styles.hidden]: !currentTrack,
           })}>
           <Player />
         </div>

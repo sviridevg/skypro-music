@@ -9,7 +9,7 @@ import { ContentPage } from "@/components/content/contentpage";
 import { Sidebar } from "@/components/sidebar/sidebar";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { fetchGenre } from "@/store/features/playListSlice";
+import { fetchGenre, fetchTracks } from "@/store/features/playListSlice";
 
 export default function Dance() {
   const classNames = require("classnames");
@@ -17,8 +17,12 @@ export default function Dance() {
   const { error } = useAppSelector((state) => state.playList);
   const dispatch = useAppDispatch();
 
+  console.log(currentTrack);
+
   useEffect(() => {
-    dispatch(fetchGenre(3));
+    dispatch(fetchTracks()).then(() => {
+      dispatch(fetchGenre(3));
+    });
   }, [dispatch]);
 
   return (

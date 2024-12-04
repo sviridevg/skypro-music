@@ -9,7 +9,7 @@ import { ContentPage } from "@/components/content/contentpage";
 import { Sidebar } from "@/components/sidebar/sidebar";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { fetchGenre } from "@/store/features/playListSlice";
+import { fetchGenre, fetchTracks } from "@/store/features/playListSlice";
 
 export default function DayGenre() {
   const classNames = require("classnames");
@@ -18,7 +18,9 @@ export default function DayGenre() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(fetchGenre(2));
+    dispatch(fetchTracks()).then(() => {
+      dispatch(fetchGenre(2));
+    });
   }, [dispatch]);
 
   return (
