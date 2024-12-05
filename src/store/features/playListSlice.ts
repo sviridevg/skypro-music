@@ -193,13 +193,16 @@ const playListSlice = createSlice({
         state.status = "pending";
         state.error = null;
       })
-      .addCase(fetchGenre.fulfilled, (state, action: PayloadAction<{ items: TrackTypes[] }>) => {
-        state.status = "resolved";
-        state.genreList = action.payload.items;
-        state.tracksList = state.tracksList.filter((track) =>
-          state.genreList.some((genre) => genre._id === track._id)
-        );
-      })
+      .addCase(
+        fetchGenre.fulfilled,
+        (state, action: PayloadAction<{ items: TrackTypes[] }>) => {
+          state.status = "resolved";
+          state.genreList = action.payload.items;
+          state.tracksList = state.shuffledList.filter((track) =>
+            state.genreList.includes(track._id)
+          );
+        }
+      )
 
       .addCase(fetchGenre.rejected, (state, action) => {
         state.status = "rejected";

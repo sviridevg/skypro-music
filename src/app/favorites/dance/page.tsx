@@ -17,7 +17,6 @@ export default function Dance() {
   const { error } = useAppSelector((state) => state.playList);
   const dispatch = useAppDispatch();
 
-  console.log(currentTrack);
 
   useEffect(() => {
     dispatch(fetchTracks()).then(() => {
