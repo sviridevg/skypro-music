@@ -42,21 +42,21 @@ export default function SignIn() {
     }
 
     try {
-      Promise.all([
-        await dispatch(
-          loginUser({ email: signInData.email, password: signInData.password })
-        ),
-        await dispatch(
-          tokenUser({ email: signInData.email, password: signInData.password })
-        ),
-        await dispatch(updateTokenUser(localStorage.getItem("refresh") ?? "")),
-      ]).then((data) => {
-        if (data[0]?.payload?._id) {
-          router.push("/");
-        } else {
-          setError("Не удалось войти");
-        }
-      });
+      await dispatch(
+        loginUser({ email: signInData.email, password: signInData.password })
+      )
+        .then((data) => {
+          if (data.type === "User/Login/fulfilled") {
+            router.push("/");
+          }
+        })
+        .catch((data) => {
+          setError(data.error.message);
+        });
+      await dispatch(
+        tokenUser({ email: signInData.email, password: signInData.password })
+      );
+      await dispatch(updateTokenUser(localStorage.getItem("refresh") ?? ""));
     } catch (error) {
       return;
     }
