@@ -56,31 +56,22 @@ export const Nav = () => {
         <div className={styles.navMenu}>
           <ul className={styles.menuList}>
             <li onClick={handleMainPageClick} className={styles.menuItem}>
-              <div
-                role="button"
-                className={styles.menuLink}
-                onClick={handleMainPageClick}>
+              <div className={styles.menuLink} onClick={handleMainPageClick}>
                 Главное
               </div>
             </li>
 
             {authState === true && (
               <li className={styles.menuItem}>
-                <div
-                  role="button"
-                  onClick={handleFavoritesClick}
-                  className={styles.menuLink}>
+                <div onClick={handleFavoritesClick} className={styles.menuLink}>
                   Мой плейлист
                 </div>
               </li>
             )}
 
-            <li className={styles.menuItem}>
+            <li role="button" className={styles.menuItem}>
               {authState === false && (
-                <div
-                  role="button"
-                  onClick={handleLoginClick}
-                  className={styles.menuLink}>
+                <div onClick={handleLoginClick} className={styles.menuLink}>
                   Войти
                 </div>
               )}

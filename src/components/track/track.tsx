@@ -83,6 +83,7 @@ export const Track = ({ track }: TrackProps) => {
         <div className={styles.trackTime}>
           <svg
             onClick={toggleLike}
+            role="img"
             className={classNames(styles.trackTimeSvg, {
               [styles.activeg]: isLiked,
             })}>
