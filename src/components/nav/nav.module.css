@@ -2,7 +2,6 @@
   width: 244px;
   background-color: #181818;
   padding: 20px 0 20px 36px;
-
 }
 
 .navLogo {
@@ -63,4 +62,5 @@
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
+  cursor: pointer;
 }

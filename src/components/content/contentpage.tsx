@@ -2,14 +2,12 @@
 
 import styles from "@/components/content/contentpage.module.css";
 import { Playlist } from "../playlist/playlist";
+import { useAppSelector } from "@/store/store";
 
-interface Playlist {
-  error: string | null;
-  audioRef: HTMLAudioElement | null;
-}
-
-export const ContentPage = ({ error, audioRef }: Playlist) => {
+export const ContentPage = () => {
+  const { status } = useAppSelector((state) => state.playList);
   const classNames = require("classnames");
+
   return (
     <div
       className={classNames(styles.centerblockContent, styles.playlistContent)}>
@@ -29,8 +27,7 @@ export const ContentPage = ({ error, audioRef }: Playlist) => {
           </svg>
         </div>
       </div>
-      <Playlist audioRef={audioRef} />
-      {error && <div>Error: {error}</div>}
+      {status === "pending" ? <div>Загрузка...</div> : <Playlist />}
     </div>
   );
 };

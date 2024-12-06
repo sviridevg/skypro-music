@@ -34,6 +34,9 @@
   left: calc(50% - (366px / 2));
   top: calc(50% - (439px / 2));
   opacity: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .modalFormLogin {
@@ -206,4 +209,5 @@
   text-align: center;
   color: #d0cece;
   margin-top: 16px;
+  max-width: 300px;
 }

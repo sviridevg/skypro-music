@@ -27,7 +27,7 @@ export const Nav = () => {
 
   // Переход на страницу избранного
   const handleFavoritesClick = () => {
-    router.push("/favorites");
+    router.push("/tracks/favorites");
   };
 
   //Переход на главную страницу
@@ -47,7 +47,7 @@ export const Nav = () => {
           height={17}
         />
       </div>
-      <div onClick={toggleModalUser} className={styles.navBurger}>
+      <div role="button" onClick={toggleModalUser} className={styles.navBurger}>
         <span className={styles.burgerLine} />
         <span className={styles.burgerLine} />
         <span className={styles.burgerLine} />
@@ -56,22 +56,24 @@ export const Nav = () => {
         <div className={styles.navMenu}>
           <ul className={styles.menuList}>
             <li onClick={handleMainPageClick} className={styles.menuItem}>
-              <a className={styles.menuLink}>Главное</a>
+              <div className={styles.menuLink} onClick={handleMainPageClick}>
+                Главное
+              </div>
             </li>
 
             {authState === true && (
               <li className={styles.menuItem}>
-                <a onClick={handleFavoritesClick} className={styles.menuLink}>
+                <div onClick={handleFavoritesClick} className={styles.menuLink}>
                   Мой плейлист
-                </a>
+                </div>
               </li>
             )}
 
-            <li className={styles.menuItem}>
+            <li role="button" className={styles.menuItem}>
               {authState === false && (
-                <a onClick={handleLoginClick} className={styles.menuLink}>
+                <div onClick={handleLoginClick} className={styles.menuLink}>
                   Войти
-                </a>
+                </div>
               )}
             </li>
           </ul>

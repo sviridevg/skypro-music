@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "@/components/player/player.module.css";
-import { ChangeEvent, useEffect, useRef } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import ProgressBar from "./progressBar";
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/store/store";
@@ -17,48 +17,57 @@ import { useLikeTrack } from "@/hooks/useLikeTrack";
 import { useCallback } from "react";
 
 type PlayerProps = {
-  progress: {
-    currentTime: number;
-    duration: number;
-  };
-  audioRef: HTMLAudioElement | null;
+  currentTime: number;
+  duration: number;
 };
 
-export const Player = ({ progress, audioRef }: PlayerProps) => {
-  const { curentTrack } = useAppSelector((state) => state.playList);
+export const Player = () => {
+  const { currentTrack } = useAppSelector((state) => state.playList);
   const { isPlaying } = useAppSelector((state) => state.playList);
   const { isShuffle } = useAppSelector((state) => state.playList);
   const { isLooping } = useAppSelector((state) => state.playList);
   const dispatch = useAppDispatch();
   const classNames = require("classnames");
+  const { isLiked, toggleLike } = useLikeTrack(Number(currentTrack?._id));
 
-  const { isLiked, toggleLike } = useLikeTrack(Number(curentTrack?._id));
+  // Инициализация audioRef
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const [progress, setProgress] = useState<PlayerProps>({
+    currentTime: 0,
+    duration: 0,
+  });
+
+  // Обработчик события изменения времени
+  const onChangeProgress = useCallback(() => {
+    if (audioRef.current) {
+      setProgress({
+        currentTime: audioRef.current.currentTime,
+        duration: audioRef.current.duration,
+      });
+    }
+  }, []);
 
   // Включение и выключение песни
   const togglePlay = useCallback(() => {
-    if (audioRef) {
-      if (isPlaying === true) {
-        audioRef?.pause();
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
         dispatch(setIsPlaying(false));
       } else {
-        audioRef?.play();
+        audioRef.current.play();
         dispatch(setIsPlaying(true));
       }
     }
-  }, [isPlaying, audioRef, dispatch]);
+  }, [isPlaying, dispatch]);
 
   // Обработчик повтора
   const toggleLoop = useCallback(() => {
-    if (audioRef) {
-      if (isLooping === false) {
-        audioRef.loop = true;
-        dispatch(setIsLooping(!isLooping));
-      } else {
-        audioRef.loop = false;
-        dispatch(setIsLooping(!isLooping));
-      }
+    if (audioRef.current) {
+      audioRef.current.loop = !audioRef.current.loop;
+      dispatch(setIsLooping(audioRef.current.loop));
     }
-  }, [isLooping, audioRef, dispatch]);
+  }, [dispatch]);
 
   // Обработчик рандомизации
   const toggleShufle = useCallback(() => {
@@ -77,46 +86,55 @@ export const Player = ({ progress, audioRef }: PlayerProps) => {
   }, [dispatch]);
 
   // изменение громкости
-  const onchangeVolume = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      if (audioRef) {
-        const volume = Number(e.target.value) / 100;
-        if (audioRef) {
-          audioRef.volume = volume;
-        }
-      }
-    },
-    [audioRef]
-  );
+  const onchangeVolume = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    if (audioRef.current) {
+      const volume = Number(e.target.value) / 100;
+      audioRef.current.volume = volume;
+    }
+  }, []);
 
   // установка выбранного времени
-  const handleSeek = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      if (audioRef) {
-        audioRef.currentTime = Number(e.currentTarget.value);
-      }
-    },
-    [audioRef]
-  );
+  const handleSeek = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = Number(e.currentTarget.value);
+    }
+  }, []);
 
+  // Повторение конца трека при остановке
   const notAlreadyExecuted = useRef(true);
   useEffect(() => {
-    if (notAlreadyExecuted.current) {
-      audioRef?.addEventListener("ended", () => dispatch(setNextTrack()));
+    if (audioRef.current && notAlreadyExecuted.current) {
+      audioRef.current.addEventListener("ended", () =>
+        dispatch(setNextTrack())
+      );
       notAlreadyExecuted.current = false;
     }
-  }, [audioRef, dispatch]);
+  }, [dispatch]);
+
+  // Запуск при загрузке трека
+  const handleCanPlay = () => {
+    audioRef.current?.play();
+    dispatch(setIsPlaying(true));
+  };
 
   return (
     <div className={styles.bar}>
+      <audio
+        className={styles.audio}
+        onCanPlay={handleCanPlay}
+        onTimeUpdate={onChangeProgress}
+        ref={audioRef}
+        controls
+        src={currentTrack?.track_file}
+      />
       <div className={styles.barContent}>
         <div className={styles.barPlayerBlock}>
           <ProgressBar
-            max={audioRef !== null ? audioRef.duration : 0}
+            max={audioRef.current ? audioRef.current.duration : 0}
             value={progress}
             step={0.01}
             onChange={handleSeek}
-            audioRef={audioRef}
+            audioRef={audioRef.current}
           />
           <div className={styles.playerBlock}>
             <div className={styles.barPlayer}>
@@ -184,12 +202,12 @@ export const Player = ({ progress, audioRef }: PlayerProps) => {
                   </div>
                   <div className={styles.trackPlayAuthor}>
                     <a className={styles.trackPlayAuthorLink} href="">
-                      {curentTrack?.name}
+                      {currentTrack?.name}
                     </a>
                   </div>
                   <div className={styles.trackPlayAlbum}>
                     <a className={styles.trackPlayAlbumLink} href="">
-                      {curentTrack?.author}
+                      {currentTrack?.author}
                     </a>
                   </div>
                 </div>

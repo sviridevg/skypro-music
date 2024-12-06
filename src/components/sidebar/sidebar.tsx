@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import styles from "@/components/sidebar/sidebar.module.css";
 import { useAppDispatch, useAppSelector } from "@/store/store";
@@ -10,6 +12,7 @@ export const Sidebar = () => {
   const dispatch = useAppDispatch();
   const { authState } = useAppSelector((state) => state.auth);
   const [username, setUsername] = useState<String>("");
+
   useEffect(() => {
     setUsername(localStorage.getItem("username") ?? "");
   }, []);
@@ -28,6 +31,21 @@ export const Sidebar = () => {
     dispatch(setAuthState(false));
   };
 
+  // Переход на 100 танцевальных хитов
+  const handleDayGenreClick = () => {
+    router.push("/tracks/favorites/daygenre");
+  };
+
+  // Переход на 100 танцевальных хитов
+  const handleDancesClick = () => {
+    router.push("/tracks/favorites/dance");
+  };
+
+  // Переход на инди
+  const handleIndieClick = () => {
+    router.push("/tracks/favorites/indie");
+  };
+
   return (
     <div className={classNames(styles.mainSidebar, styles.sidebar)}>
       <div className={styles.sidebarPersonal}>
@@ -44,7 +62,7 @@ export const Sidebar = () => {
       </div>
       <div className={styles.sidebarBlock}>
         <div className={styles.sidebarList}>
-          <div className={styles.sidebarItem}>
+          <div onClick={handleDayGenreClick} className={styles.sidebarItem}>
             <a
               className={styles.sidebarLink}
               aria-label="Read more about Seminole tax hike"
@@ -58,7 +76,7 @@ export const Sidebar = () => {
               />
             </a>
           </div>
-          <div className={styles.sidebarItem}>
+          <div onClick={handleDancesClick} className={styles.sidebarItem}>
             <a
               className={styles.sidebarLink}
               aria-label="Read more about Seminole tax hike"
@@ -72,7 +90,7 @@ export const Sidebar = () => {
               />
             </a>
           </div>
-          <div className={styles.sidebarItem}>
+          <div onClick={handleIndieClick} className={styles.sidebarItem}>
             <a
               className={styles.sidebarLink}
               aria-label="Read more about Seminole tax hike"

@@ -19,7 +19,7 @@ export default function ProgressBar({
   onChange,
   audioRef,
 }: progressBarProps) {
-  const currentTrackDuration = audioRef?.duration;
+  const currentTrackDuration = audioRef?.duration ?? 0;
 
   const timer = (time: number) => {
     let minutes = Math.floor(time / 60)
@@ -31,6 +31,14 @@ export default function ProgressBar({
     return { minutes: minutes, seconds: seconds };
   };
 
+  // Функция для безопасного отображения длительности трека
+  const getTrackDuration = () => {
+    if (isNaN(currentTrackDuration) || currentTrackDuration === 0) {
+      return null;
+    }
+    return timer(currentTrackDuration);
+  };
+
   return (
     <div>
       <div className={styles.timerBlock}>
@@ -38,16 +46,16 @@ export default function ProgressBar({
           {timer(value.currentTime).minutes}:{timer(value.currentTime).seconds}
         </div>
         <div>
-          {!value.duration && currentTrackDuration && (
+          {value.duration === 0 &&
+            currentTrackDuration > 0 &&
+            getTrackDuration() && (
+              <div>
+                {getTrackDuration()?.minutes}:{getTrackDuration()?.seconds}
+              </div>
+            )}
+          {value.currentTime > 0 && getTrackDuration() && (
             <div>
-              {timer(currentTrackDuration).minutes}:
-              {timer(currentTrackDuration).seconds}
-            </div>
-          )}
-          {value.currentTime > 0 && (
-            <div>
-              {timer(Number(currentTrackDuration)).minutes}:
-              {timer(Number(currentTrackDuration)).seconds}
+              {getTrackDuration()?.minutes}:{getTrackDuration()?.seconds}
             </div>
           )}
         </div>

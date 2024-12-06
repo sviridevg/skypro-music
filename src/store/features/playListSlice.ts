@@ -3,6 +3,7 @@ import {
   dellFavoritesForId,
   favorites,
   getTracks,
+  viewSelectionForId,
 } from "@/api/tracks";
 import { TrackTypes } from "@/types/tracks";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
@@ -12,11 +13,12 @@ type playListStateType = {
   isShuffle: boolean;
   isLooping: boolean;
   isLiked: boolean;
-  curentTrack: TrackTypes | null;
+  currentTrack: TrackTypes | null;
   tracksList: TrackTypes[];
   shuffledList: TrackTypes[];
   historyList: TrackTypes[];
   favoritesList: TrackTypes[];
+  genreList: TrackTypes[];
   isFavorite: number[];
   currentTrackDuration: number | undefined;
   status: string;
@@ -28,8 +30,9 @@ const initialState: playListStateType = {
   shuffledList: [],
   historyList: [],
   favoritesList: [],
+  genreList: [],
   isFavorite: [],
-  curentTrack: null,
+  currentTrack: null,
   isPlaying: false,
   isShuffle: false,
   isLooping: false,
@@ -39,6 +42,7 @@ const initialState: playListStateType = {
   error: null,
 };
 
+// Получение всех треков
 export const fetchTracks = createAsyncThunk(
   "playList/fetchTracks",
   async () => {
@@ -46,6 +50,7 @@ export const fetchTracks = createAsyncThunk(
   }
 );
 
+// Получение избранных треков
 export const fetchFavoritesTracks = createAsyncThunk(
   "playList/fetchFavoritesTracks",
   async () => {
@@ -53,6 +58,15 @@ export const fetchFavoritesTracks = createAsyncThunk(
   }
 );
 
+// Получение треков по жанру
+export const fetchGenre = createAsyncThunk(
+  "playList/fetchGenre",
+  async (id: number) => {
+    return await viewSelectionForId(id);
+  }
+);
+
+// Добавление в избранное
 export const pushFavoriteTrack = createAsyncThunk(
   "playList/pushFavoriteTrack",
   async (id: number) => {
@@ -60,6 +74,7 @@ export const pushFavoriteTrack = createAsyncThunk(
   }
 );
 
+// Удаление из избранного
 export const dellFavoriteTrack = createAsyncThunk(
   "playList/dellFavoriteTrack",
   async (id: number) => {
@@ -67,6 +82,7 @@ export const dellFavoriteTrack = createAsyncThunk(
   }
 );
 
+// Слайдер
 const playListSlice = createSlice({
   name: "playList",
   initialState,
@@ -78,12 +94,8 @@ const playListSlice = createSlice({
     setFavoritesList: (state, action: PayloadAction<TrackTypes[]>) => {
       state.favoritesList = action.payload;
     },
-    setCurrentTrack: (state, action: PayloadAction<TrackTypes | null>) => {
-      state.curentTrack = action.payload;
-      state.historyList =
-        state.curentTrack !== null
-          ? [...state.historyList, state.curentTrack]
-          : state.historyList;
+    setCurrentTrack(state, action) {
+      state.currentTrack = action.payload;
     },
     setIsPlaying: (state, action: PayloadAction<boolean>) => {
       state.isPlaying = action.payload;
@@ -97,19 +109,11 @@ const playListSlice = createSlice({
     setNextTrack: (state) => {
       const playList = !state.isShuffle ? state.tracksList : state.shuffledList;
       const indexTrack = playList.findIndex(
-        (e) => e._id === state.curentTrack?._id
+        (e) => e._id === state.currentTrack?._id
       );
 
-      // Запуск следующей песни по клику
-      state.curentTrack = playList[indexTrack + 1];
+      state.currentTrack = playList[indexTrack + 1] || playList[0];
 
-      // Обработчик последней песни
-      if (indexTrack === playList.length - 1) {
-        state.curentTrack = playList[0];
-        return;
-      }
-
-      // Обработчик состояния переключения песни из режима паузы
       if (state.isPlaying === false) {
         state.isPlaying = true;
       }
@@ -117,12 +121,12 @@ const playListSlice = createSlice({
     setPreviousTrack: (state) => {
       const playList = !state.isShuffle ? state.tracksList : state.shuffledList;
       const indexTrack = playList.findIndex(
-        (e) => e._id === state.curentTrack?._id
+        (e) => e._id === state.currentTrack?._id
       );
       if (indexTrack === 0) {
         return;
       }
-      state.curentTrack = playList[indexTrack - 1];
+      state.currentTrack = playList[indexTrack - 1];
       if (state.isPlaying === false) {
         state.isPlaying = true;
       }
@@ -138,12 +142,11 @@ const playListSlice = createSlice({
     },
     setFavoriteTrack: (state, action) => {
       state.isFavorite.push(action.payload);
-      const track = state.tracksList.find(t => t._id === action.payload);
+      const track = state.tracksList.find((t) => t._id === action.payload);
       if (track) {
         state.favoritesList.push(track);
       }
     },
-
     setDellFavoriteTrack: (state, action) => {
       state.favoritesList = state.favoritesList.filter(
         (track) => track._id !== action.payload
@@ -186,6 +189,25 @@ const playListSlice = createSlice({
       .addCase(fetchFavoritesTracks.rejected, (state) => {
         state.status = "rejected";
         state.error = null;
+      })
+      .addCase(fetchGenre.pending, (state) => {
+        state.status = "pending";
+        state.error = null;
+      })
+      .addCase(
+        fetchGenre.fulfilled,
+        (state, action: PayloadAction<{ items: TrackTypes[] }>) => {
+          state.status = "resolved";
+          state.genreList = action.payload.items;
+          state.tracksList = state.shuffledList.filter((track) =>
+            state.genreList.includes(track._id)
+          );
+        }
+      )
+
+      .addCase(fetchGenre.rejected, (state, action) => {
+        state.status = "rejected";
+        state.error = action.error.message || "Ошибка загрузки жанров";
       });
   },
 });
@@ -204,4 +226,5 @@ export const {
   setFavoriteTrack,
   setDellFavoriteTrack,
 } = playListSlice.actions;
+
 export const playListSliceReducer = playListSlice.reducer;
