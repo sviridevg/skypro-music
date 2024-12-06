@@ -27,7 +27,7 @@ export const Nav = () => {
 
   // Переход на страницу избранного
   const handleFavoritesClick = () => {
-    router.push("/favorites");
+    router.push("/tracks/favorites");
   };
 
   //Переход на главную страницу

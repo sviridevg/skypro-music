@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import styles from "@/components/sidebar/sidebar.module.css";
 import { useAppDispatch, useAppSelector } from "@/store/store";
@@ -31,17 +33,17 @@ export const Sidebar = () => {
 
   // Переход на 100 танцевальных хитов
   const handleDayGenreClick = () => {
-    router.push("/favorites/daygenre");
+    router.push("/tracks/favorites/daygenre");
   };
 
   // Переход на 100 танцевальных хитов
   const handleDancesClick = () => {
-    router.push("/favorites/dance");
+    router.push("/tracks/favorites/dance");
   };
 
   // Переход на инди
   const handleIndieClick = () => {
-    router.push("/favorites/indie");
+    router.push("/tracks/favorites/indie");
   };
 
   return (

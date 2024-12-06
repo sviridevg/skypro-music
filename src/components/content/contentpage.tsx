@@ -4,11 +4,7 @@ import styles from "@/components/content/contentpage.module.css";
 import { Playlist } from "../playlist/playlist";
 import { useAppSelector } from "@/store/store";
 
-interface Playlist {
-  error: string | null;
-}
-
-export const ContentPage = ({ error }: Playlist) => {
+export const ContentPage = () => {
   const { status } = useAppSelector((state) => state.playList);
   const classNames = require("classnames");
 
@@ -31,13 +27,7 @@ export const ContentPage = ({ error }: Playlist) => {
           </svg>
         </div>
       </div>
-      {status === "pending" ? (
-        <div>Загрузка...</div>
-      ) : (
-        <Playlist/>
-      )}
-
-      {error && <div>Error: {error}</div>}
+      {status === "pending" ? <div>Загрузка...</div> : <Playlist />}
     </div>
   );
 };

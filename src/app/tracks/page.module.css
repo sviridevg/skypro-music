@@ -20,13 +20,15 @@
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  /* -ms-flex-wrap: wrap;
+  flex-wrap: wrap; */
   -webkit-box-pack: justify;
   -ms-flex-pack: justify;
   justify-content: space-between;
 }
 
 .mainCenterblock {
-  width: auto;
+  width: 1260px;
   -webkit-box-flex: 3;
   -ms-flex-positive: 3;
   flex-grow: 3;
