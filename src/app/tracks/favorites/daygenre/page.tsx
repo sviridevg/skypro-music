@@ -2,7 +2,7 @@
 
 import styles from "@/app/tracks/favorites/page.module.css";
 import { useEffect } from "react";
-import { useAppDispatch  } from "@/store/store";
+import { useAppDispatch, useAppSelector  } from "@/store/store";
 import { fetchGenre, fetchTracks } from "@/store/features/playListSlice";
 
 export default function DayGenre() {

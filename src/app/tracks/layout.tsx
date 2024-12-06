@@ -8,7 +8,9 @@ import { ContentPage } from "@/components/content/contentpage";
 import { Sidebar } from "@/components/sidebar/sidebar";
 import { Player } from "@/components/player/player";
 import classNames from "classnames";
-import { useAppSelector } from "@/store/store";
+import { useAppDispatch, useAppSelector } from "@/store/store";
+import { updateTokenUser } from "@/store/features/authSlice";
+import { useEffect } from "react";
 
 export default function RootLayout({
   children,
@@ -16,7 +18,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const { currentTrack } = useAppSelector((state) => state.playList);
+  const dispatch = useAppDispatch();
+  const tokenUpdate = async () => {
+    const reftoken = localStorage.getItem("refresh") ?? "";
+    await dispatch(updateTokenUser(reftoken));
+  };
 
+  useEffect(() => {
+    const accToken = localStorage.getItem("access");
+    if (!accToken) {
+      tokenUpdate();
+    }
+  }, []);
   return (
     <div className={styles.wrapper}>
       <div className={styles.container}>

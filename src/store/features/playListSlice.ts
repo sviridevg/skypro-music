@@ -23,10 +23,15 @@ type playListStateType = {
   currentTrackDuration: number | undefined;
   status: string;
   error: null | string;
+  searchKeyword: string;
+  originalTracksList: TrackTypes[];
+  currentGenre: TrackTypes[];
+  whatApage: string;
 };
 
 const initialState: playListStateType = {
   tracksList: [],
+  originalTracksList: [],
   shuffledList: [],
   historyList: [],
   favoritesList: [],
@@ -40,6 +45,9 @@ const initialState: playListStateType = {
   currentTrackDuration: undefined,
   status: "",
   error: null,
+  searchKeyword: "",
+  currentGenre: [],
+  whatApage: "",
 };
 
 // Получение всех треков
@@ -153,6 +161,33 @@ const playListSlice = createSlice({
       );
       state.isFavorite = state.isFavorite.filter((id) => id !== action.payload);
     },
+    setSearchKeyword: (state, action: PayloadAction<string>) => {
+      state.searchKeyword = action.payload;
+
+      const lowerCaseKeyword = action.payload.toLowerCase();
+      // Фильтруем оригинальный список
+
+      if (state.whatApage === "genre") {
+        state.tracksList = state.currentGenre.filter(
+          (track) =>
+            track.name.toLowerCase().includes(lowerCaseKeyword) ||
+            track.author.toLowerCase().includes(lowerCaseKeyword)
+        );
+      } else {
+        state.tracksList = state.originalTracksList.filter(
+          (track) =>
+            track.name.toLowerCase().includes(lowerCaseKeyword) ||
+            track.author.toLowerCase().includes(lowerCaseKeyword)
+        );
+      }
+    },
+    resetTracks: (state) => {
+      state.tracksList =
+        state.whatApage === "genre"
+          ? state.currentGenre
+          : state.originalTracksList;
+      state.searchKeyword = "";
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -164,6 +199,7 @@ const playListSlice = createSlice({
         fetchTracks.fulfilled,
         (state, action: PayloadAction<TrackTypes[]>) => {
           state.status = "resolved";
+          state.originalTracksList = action.payload;
           state.tracksList = action.payload;
           state.shuffledList = action.payload;
         }
@@ -197,9 +233,13 @@ const playListSlice = createSlice({
       .addCase(
         fetchGenre.fulfilled,
         (state, action: PayloadAction<{ items: TrackTypes[] }>) => {
+          state.whatApage = "genre";
           state.status = "resolved";
           state.genreList = action.payload.items;
           state.tracksList = state.shuffledList.filter((track) =>
+            state.genreList.includes(track._id)
+          );
+          state.currentGenre = state.shuffledList.filter((track) =>
             state.genreList.includes(track._id)
           );
         }
@@ -225,6 +265,8 @@ export const {
   setFavoritesList,
   setFavoriteTrack,
   setDellFavoriteTrack,
+  setSearchKeyword,
+  resetTracks,
 } = playListSlice.actions;
 
 export const playListSliceReducer = playListSlice.reducer;
