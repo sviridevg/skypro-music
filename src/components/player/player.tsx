@@ -6,7 +6,6 @@ import ProgressBar from "./progressBar";
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import {
-  setCurrentTime,
   setIsLooping,
   setIsPlaying,
   setIsShuffle,
@@ -24,7 +23,6 @@ type PlayerProps = {
 
 export const Player = () => {
   const { currentTrack } = useAppSelector((state) => state.playList);
-  const { currentTime } = useAppSelector((state) => state.playList);
   const { isPlaying } = useAppSelector((state) => state.playList);
   const { isShuffle } = useAppSelector((state) => state.playList);
   const { isLooping } = useAppSelector((state) => state.playList);
@@ -32,47 +30,23 @@ export const Player = () => {
   const classNames = require("classnames");
   const { isLiked, toggleLike } = useLikeTrack(Number(currentTrack?._id));
 
-
   // Инициализация audioRef
   const audioRef = useRef<HTMLAudioElement>(null);
-
-
-
-  useEffect(() => {
-    if (audioRef.current && currentTrack) {
-      audioRef.current.currentTime = currentTime;
-    }
-    // Только currentTrack и isPlaying как триггеры
-    if (isPlaying && audioRef.current) {
-      audioRef.current.play();
-    } else {
-      audioRef.current?.pause();
-    }
-  }, []);
-
 
   const [progress, setProgress] = useState<PlayerProps>({
     currentTime: 0,
     duration: 0,
   });
 
-
-
+  // Обработчик события изменения времени
   const onChangeProgress = useCallback(() => {
     if (audioRef.current) {
-      const newTime = audioRef.current.currentTime;
       setProgress({
-        currentTime: newTime,
+        currentTime: audioRef.current.currentTime,
         duration: audioRef.current.duration,
       });
-  
-      // Проверяем, изменилось ли время
-      if (newTime !== currentTime) {
-        dispatch(setCurrentTime(newTime));  // Обновляем только при изменении
-      }
     }
-  }, [dispatch, currentTime]);
-
+  }, []);
 
   // Включение и выключение песни
   const togglePlay = useCallback(() => {
@@ -126,6 +100,7 @@ export const Player = () => {
     }
   }, []);
 
+  // Повторение конца трека при остановке
   const notAlreadyExecuted = useRef(true);
   useEffect(() => {
     if (audioRef.current && notAlreadyExecuted.current) {
@@ -136,6 +111,7 @@ export const Player = () => {
     }
   }, [dispatch]);
 
+  // Запуск при загрузке трека
   const handleCanPlay = () => {
     audioRef.current?.play();
     dispatch(setIsPlaying(true));
