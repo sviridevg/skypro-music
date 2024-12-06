@@ -23,7 +23,6 @@ type playListStateType = {
   currentTrackDuration: number | undefined;
   status: string;
   error: null | string;
-  currentTime: number;
 };
 
 const initialState: playListStateType = {
@@ -41,9 +40,9 @@ const initialState: playListStateType = {
   currentTrackDuration: undefined,
   status: "",
   error: null,
-  currentTime: 0,
 };
 
+// Получение всех треков
 export const fetchTracks = createAsyncThunk(
   "playList/fetchTracks",
   async () => {
@@ -51,6 +50,7 @@ export const fetchTracks = createAsyncThunk(
   }
 );
 
+// Получение избранных треков
 export const fetchFavoritesTracks = createAsyncThunk(
   "playList/fetchFavoritesTracks",
   async () => {
@@ -58,6 +58,7 @@ export const fetchFavoritesTracks = createAsyncThunk(
   }
 );
 
+// Получение треков по жанру
 export const fetchGenre = createAsyncThunk(
   "playList/fetchGenre",
   async (id: number) => {
@@ -65,6 +66,7 @@ export const fetchGenre = createAsyncThunk(
   }
 );
 
+// Добавление в избранное
 export const pushFavoriteTrack = createAsyncThunk(
   "playList/pushFavoriteTrack",
   async (id: number) => {
@@ -72,6 +74,7 @@ export const pushFavoriteTrack = createAsyncThunk(
   }
 );
 
+// Удаление из избранного
 export const dellFavoriteTrack = createAsyncThunk(
   "playList/dellFavoriteTrack",
   async (id: number) => {
@@ -79,6 +82,7 @@ export const dellFavoriteTrack = createAsyncThunk(
   }
 );
 
+// Слайдер
 const playListSlice = createSlice({
   name: "playList",
   initialState,
@@ -148,9 +152,6 @@ const playListSlice = createSlice({
         (track) => track._id !== action.payload
       );
       state.isFavorite = state.isFavorite.filter((id) => id !== action.payload);
-    },
-    setCurrentTime(state, action) {
-      state.currentTime = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -224,7 +225,6 @@ export const {
   setFavoritesList,
   setFavoriteTrack,
   setDellFavoriteTrack,
-  setCurrentTime,
 } = playListSlice.actions;
 
 export const playListSliceReducer = playListSlice.reducer;
