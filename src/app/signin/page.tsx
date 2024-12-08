@@ -11,6 +11,7 @@ import {
   updateTokenUser,
 } from "@/store/features/authSlice";
 import { useRouter } from "next/navigation";
+import { fetchTracks } from "@/store/features/playListSlice";
 
 export default function SignIn() {
   const dispatch = useAppDispatch();
@@ -47,7 +48,9 @@ export default function SignIn() {
       )
         .then((data) => {
           if (data.type === "User/Login/fulfilled") {
-            router.push("/");
+            dispatch(fetchTracks()).finally(() => {
+              router.push("/");
+            });
           }
         })
         .catch((data) => {

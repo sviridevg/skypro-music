@@ -6,7 +6,11 @@ import { useAppDispatch, useAppSelector } from "@/store/store";
 import { useRouter } from "next/navigation";
 import { setAuthState } from "@/store/features/authSlice";
 import { useEffect, useState } from "react";
-import { fetchFavoritesTracks, fetchTracks } from "@/store/features/playListSlice";
+import {
+  fetchFavoritesTracks,
+  fetchTracks,
+  setWhatAPage,
+} from "@/store/features/playListSlice";
 
 export const Sidebar = () => {
   const classNames = require("classnames");
@@ -30,23 +34,26 @@ export const Sidebar = () => {
     localStorage.clear();
     router.push("/");
     dispatch(setAuthState(false));
-    dispatch(fetchTracks())
+    dispatch(fetchTracks());
     dispatch(fetchFavoritesTracks());
   };
 
   // Переход на 100 танцевальных хитов
   const handleDayGenreClick = () => {
     router.push("/tracks/favorites/daygenre");
+    dispatch(setWhatAPage("genre"));
   };
 
   // Переход на 100 танцевальных хитов
   const handleDancesClick = () => {
     router.push("/tracks/favorites/dance");
+    dispatch(setWhatAPage("genre"));
   };
 
   // Переход на инди
   const handleIndieClick = () => {
     router.push("/tracks/favorites/indie");
+    dispatch(setWhatAPage("genre"));
   };
 
   return (

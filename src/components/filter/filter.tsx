@@ -1,53 +1,56 @@
 "use client";
-import styles from "@/components/filter/filter.module.css";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { FilterItem } from "./filterItem";
-import { useAppSelector } from "@/store/store";
+import { useAppSelector, useAppDispatch } from "@/store/store";
+import classNames from "classnames";
+import styles from "@/components/filter/filter.module.css";
 
 export const Filter = () => {
-  const { tracksList } = useAppSelector((state) => state.playList);
-  const classNames = require("classnames");
 
+  const { shuffledList } = useAppSelector((state) => state.playList);
+  const { whatApage } = useAppSelector((state) => state.playList);
+  const { currentGenre, activeGenres, activeAuthors, sortOption } =
+    useAppSelector((state) => state.playList);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
-  // Мемоизация уникальных значений для каждого фильтра
-  const getUnValue = useMemo(
-    () =>
-      <T, K extends keyof T>(items: T[], key: K): string[] => {
-        const unValues = new Set<string>();
-        items.forEach((item) => unValues.add(String(item[key])));
-        return Array.from(unValues);
-      },
-    []
-  );
+  // Функция для извлечения уникальных значений по ключу
+  const extractUniqueValues = <T, K extends keyof T>(
+    items: T[],
+    key: K
+  ): string[] => {
+    const uniqueValues = new Set<string>();
+    items.forEach((item) => uniqueValues.add(String(item[key])));
+    return Array.from(uniqueValues);
+  };
 
   const handleFilter = (filter: string) => {
     setActiveFilter((prev) => (prev === filter ? null : filter));
   };
 
-  const filtersOptions = ["По умолчанию", "Сначала новые", "Сначала старые"];
-
-  // Мемоизация фильтров
-  const filters = useMemo(
-    () => [
-      {
-        title: "исполнителю",
-        key: "author",
-        list: getUnValue(tracksList, "author"),
-      },
-      {
-        title: "жанру",
-        key: "genre",
-        list: getUnValue(tracksList, "genre"),
-      },
-      {
-        title: "году",
-        key: "year",
-        list: filtersOptions,
-      },
-    ],
-    [tracksList, getUnValue]
-  );
+  // Изначальные фильтры (они не изменяются)
+  const filters = [
+    {
+      title: "Исполнителю",
+      key: "author",
+      list: extractUniqueValues(
+        whatApage === "genre" ? currentGenre : shuffledList,
+        "author"
+      ),
+    },
+    {
+      title: "Жанру",
+      key: "genre",
+      list: extractUniqueValues(
+        whatApage === "genre" ? currentGenre : shuffledList,
+        "genre"
+      ),
+    },
+    {
+      title: "Году",
+      key: "year",
+      list: ["По умолчанию", "Сначала новые", "Сначала старые"],
+    },
+  ];
 
   return (
     <div className={classNames(styles.centerblockFilter, styles.filter)}>
@@ -57,12 +60,36 @@ export const Filter = () => {
         <div key={filter.key} className={filter.key}>
           <div
             onClick={() => handleFilter(filter.key)}
-            className={
+            className={classNames(
+              styles.filterButton,
               activeFilter !== filter.key
-                ? classNames(styles.filterButton, styles.btnText)
-                : classNames(styles.filterButton, styles.activeFilterButton)
-            }>
-            {filter.title}
+                ? styles.btnText
+                : styles.activeFilterButton
+            )}>
+            {filter.title === "Исполнителю" && (
+              <>
+                {filter.title}
+                {activeAuthors.length > 0 && (
+                  <div className={styles.filterTab}>{activeAuthors.length}</div>
+                )}
+              </>
+            )}
+            {filter.title === "Жанру" && (
+              <>
+                {filter.title}
+                {activeGenres.length > 0 && (
+                  <div className={styles.filterTab}>{activeGenres.length}</div>
+                )}
+              </>
+            )}
+            {filter.title === "Году" && (
+              <>
+                {filter.title}
+                {sortOption.length > 0 && (
+                  <div className={styles.filterTab}>{sortOption.length}</div>
+                )}
+              </>
+            )}
           </div>
           {activeFilter === filter.key && (
             <div className={styles.filterItem}>
@@ -70,6 +97,7 @@ export const Filter = () => {
                 <FilterItem
                   list={filter.list}
                   isactive={activeFilter === filter.key}
+                  filterKey={filter.key as "genre" | "author" | "year"}
                 />
               </div>
             </div>
