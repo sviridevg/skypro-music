@@ -11,19 +11,26 @@ import { useMemo } from "react";
 export const useLikeTrack = (id: number) => {
   const dispatch = useAppDispatch();
 
+  // Проверка авторизации через localStorage
+  const isauth = localStorage.getItem("authState") === "true";
+
+  // Получаем избранные треки из Redux
   const favoriteTracks = useAppSelector((state) => state.playList.isFavorite);
 
-  // Мемоизируем вычисление isLiked
-  const isLiked = useMemo(
-    () => favoriteTracks.some((track) => track === id),
-    [favoriteTracks, id]
-  );
+  // Мемоизируем вычисление isLiked с учетом авторизации
+  const isLiked = useMemo(() => {
+    if (!isauth) {
+      return false;
+    }
+    return favoriteTracks.some((track) => track === id);
+  }, [favoriteTracks, id, isauth]);
 
   const toggleLike = async () => {
     const access = localStorage.getItem("access");
     const refresh = localStorage.getItem("refresh");
     const user = localStorage.getItem("email");
 
+    // Проверяем, что пользователь авторизован
     if (!access || !refresh || !user) {
       return alert("Зарегистрируйтесь или войдите");
     }
@@ -42,7 +49,7 @@ export const useLikeTrack = (id: number) => {
           dispatch(setFavoriteTrack(id));
         }
       } catch (error) {
-        return;
+        console.error("Ошибка при переключении лайка:", error);
       }
     }
   };

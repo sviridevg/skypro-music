@@ -6,6 +6,7 @@ import { useAppSelector } from "@/store/store";
 
 export const ContentPage = () => {
   const { status } = useAppSelector((state) => state.playList);
+  const { tracksList } = useAppSelector((state) => state.playList);
   const classNames = require("classnames");
 
   return (
@@ -28,6 +29,9 @@ export const ContentPage = () => {
         </div>
       </div>
       {status === "pending" ? <div>Загрузка...</div> : <Playlist />}
+      {status === "resolved" && tracksList.length === 0 && (
+        <div className={styles.playlistErr}>Треки не найдены</div>
+      )}
     </div>
   );
 };

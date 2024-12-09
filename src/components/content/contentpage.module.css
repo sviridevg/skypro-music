@@ -40,6 +40,15 @@
   text-transform: uppercase;
 }
 
+.playlistErr {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #696969;
+}
+
+
 .playlistTitleSvg {
   width: 12px;
   height: 12px;
