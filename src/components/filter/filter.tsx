@@ -7,8 +7,14 @@ import classNames from "classnames";
 import styles from "@/components/filter/filter.module.css";
 
 export const Filter = () => {
-  const { shuffledList, whatApage, currentGenre, activeGenres, activeAuthors, sortOption } =
-    useAppSelector((state) => state.playList);
+  const {
+    shuffledList = [], // устанавливаем значение по умолчанию
+    whatApage,
+    currentGenre,
+    activeGenres = [],
+    activeAuthors = [],
+    sortOption = [],
+  } = useAppSelector((state) => state.playList);
 
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
@@ -20,29 +26,32 @@ export const Filter = () => {
     };
   }, []);
 
-  const filters = useMemo(() => [
-    {
-      title: "Исполнителю",
-      key: "author",
-      list: uniqueValuesByKey(
-        whatApage === "genre" ? currentGenre : shuffledList,
-        "author"
-      ),
-    },
-    {
-      title: "Жанру",
-      key: "genre",
-      list: uniqueValuesByKey(
-        whatApage === "genre" ? currentGenre : shuffledList,
-        "genre"
-      ),
-    },
-    {
-      title: "Году",
-      key: "year",
-      list: ["По умолчанию", "Сначала новые", "Сначала старые"],
-    },
-  ], [whatApage, currentGenre, shuffledList, uniqueValuesByKey]);
+  const filters = useMemo(() => {
+    if (!shuffledList || !currentGenre) return []; // Проверяем, что данные загружены
+    return [
+      {
+        title: "Исполнителю",
+        key: "author",
+        list: uniqueValuesByKey(
+          whatApage === "genre" ? currentGenre : shuffledList,
+          "author"
+        ),
+      },
+      {
+        title: "Жанру",
+        key: "genre",
+        list: uniqueValuesByKey(
+          whatApage === "genre" ? currentGenre : shuffledList,
+          "genre"
+        ),
+      },
+      {
+        title: "Году",
+        key: "year",
+        list: ["По умолчанию", "Сначала новые", "Сначала старые"],
+      },
+    ];
+  }, [whatApage, currentGenre, shuffledList, uniqueValuesByKey]);
 
   const handleFilter = (filter: string) => {
     setActiveFilter((prev) => (prev === filter ? null : filter));
