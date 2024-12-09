@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# Music Player App
 
-First, run the development server:
+## Описание
+Music Player App — это современное приложение c удобным интерфейсом для управления музыкальной библиотекой и воспроизведения треков.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Функционал приложения
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Главные возможности
+- **Просмотр треков**:
+  - Отображение списка треков с информацией о названии, исполнителе, альбоме, годе выпуска и длительности.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Фильтрация**:
+  - Возможность фильтровать треки по:
+    - Исполнителю
+    - Жанру
+    - Году выпуска
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- **Поиск**:
+  - Быстрый поиск треков по их названию через строку поиска.
 
-## Learn More
+- **Сортировка**:
+  - Сортировка треков по году выпуска в порядке возрастания или убывания.
 
-To learn more about Next.js, take a look at the following resources:
+- **Добавление в избранное**:
+  - Управление списком избранных треков с сохранением этих данных в учетной записи пользователя.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Просмотр подборок**:
+  - Доступ к плейлистам и различным музыкальным подборкам.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- **Управление воспроизведением**:
+  - Включение/пауза трека
+  - Переключение треков
+  - Режим случайного воспроизведения (shuffle)
+  - Режим зацикливания (loop)
 
-## Deploy on Vercel
+- **Регулировка громкости**:
+  - Управление уровнем громкости воспроизведения.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Поддержка авторизации**:
+  - Возможность добавления треков в избранное доступна только авторизованным пользователям.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- **Управление сеансом пользователя**:
+  - Вход
+  - Выход
+  - Хранение токенов доступа
+
+## Используемые технологии
+- **Frontend**:
+  - React: библиотека для построения пользовательского интерфейса.
+  - Redux Toolkit: управление состоянием приложения.
+  - React Router: маршрутизация между страницами.
+  - TypeScript: статическая типизация для повышения стабильности и предсказуемости кода.
+  - CSS Modules: стилизация компонентов.
+
+## Установка и запуск
+
+### Локальная установка
+1. Убедитесь, что у вас установлен Node.js версии 14+.
+2. Склонируйте репозиторий и перейдите в директорию проекта:
+   ```bash
+   git clone <repository_url>
+   cd <project_directory>
+   ```
+3. Установите зависимости:
+   ```bash
+   npm install
+   ```
+4. Запустите приложение:
+   ```bash
+   npm run dev
+   ```
