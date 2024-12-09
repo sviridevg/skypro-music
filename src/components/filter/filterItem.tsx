@@ -1,4 +1,5 @@
 "use client";
+
 import styles from "@/components/filter/filter.module.css";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import {
@@ -17,15 +18,18 @@ interface FilterItemProps {
 export const FilterItem = ({ list, filterKey }: FilterItemProps) => {
   const dispatch = useAppDispatch();
 
-  const selectedItems = useAppSelector((state) =>
-    filterKey === "genre"
-      ? state.playList.activeGenres
-      : filterKey === "author"
-        ? state.playList.activeAuthors
-        : filterKey === "year"
-          ? state.playList.sortOption
-          : []
-  );
+  const selectedItems = useAppSelector((state) => {
+    switch (filterKey) {
+      case "genre":
+        return state.playList.activeGenres;
+      case "author":
+        return state.playList.activeAuthors;
+      case "year":
+        return state.playList.sortOption;
+      default:
+        return [];
+    }
+  });
 
   const handleToggle = (item: string) => {
     let updatedItems;
