@@ -5,9 +5,12 @@ import styles from "@/components/nav/nav.module.css";
 import { useState } from "react";
 
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/store/store";
+import { setWhatAPage } from "@/store/features/playListSlice";
 
 export const Nav = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const authState =
     typeof window !== "undefined" &&
@@ -28,11 +31,13 @@ export const Nav = () => {
   // Переход на страницу избранного
   const handleFavoritesClick = () => {
     router.push("/tracks/favorites");
+    dispatch(setWhatAPage("favorit"));
   };
 
   //Переход на главную страницу
   const handleMainPageClick = () => {
     router.push("/");
+    dispatch(setWhatAPage("main"));
   };
 
   return (
